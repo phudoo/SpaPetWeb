@@ -1,0 +1,171 @@
+<aside class="sidebar">
+  <nav class="menu">
+    <ng-container *ngIf="userRole === 'doctor'; else notDoctor">
+      <a routerLink="/homedoctor"
+        ><i class="fas fa-user-md"></i>Quản Lý Lịch Hẹn</a
+      >
+      <a routerLink="/doctor/orders"
+        ><i class="fas fa-notes-medical"></i> Quản lý Đơn Hàng</a
+      >
+      <a routerLink="/admin/products"><i class="fas fa-boxes"></i> Quản Lý Sản phẩm</a>
+      <a routerLink="/blog"><i class="fas fa-blog"></i> Blog</a>
+      <a routerLink="/album"><i class="fas fa-images"></i> Album</a>
+      <a routerLink="/services"><i class="fas fa-star"></i> Review</a>
+
+      <a routerLink="/allcontacts"><i class="fas fa-address-book"></i> Liên Hệ</a>
+
+      <a routerLink="/revenue"><i class="fas fa-chart-bar"></i> Thống Kê</a>
+    </ng-container>
+    <ng-template #notDoctor>
+      <ng-container *ngIf="userRole === 'admin'; else defaultMenu">
+        <a routerLink="/menuadmin"
+          ><i class="fas fa-user-shield"></i> Trang Admin</a
+        >
+  
+      </ng-container>
+      <ng-template #defaultMenu>
+        <ng-container *ngIf="userRole; else guestMenu">
+          <a routerLink="/interface"
+            ><i class="fas fa-chart-line"></i> Tổng Quan</a
+          >
+          <a routerLink="/addappointment"
+            ><i class="fas fa-calendar-plus"></i> Đặt Lịch</a
+          >
+          <a routerLink="/allappointment"
+            ><i class="fas fa-calendar-alt"></i> Lịch Hẹn</a
+          >
+          <a routerLink="/allproduct"><i class="fas fa-shopping-bag"></i> Sản Phẩm</a>
+          <a routerLink="/services"><i class="fas fa-spa"></i> Dịch Vụ</a>
+          <a routerLink="/album"><i class="fas fa-images"></i> My Album</a>
+          <a routerLink="/blog"><i class="fas fa-blog"></i> Blog</a>
+        </ng-container>
+        <ng-template #guestMenu>
+          <a routerLink="/allproduct"><i class="fas fa-shopping-bag"></i> Sản Phẩm</a>
+          <a routerLink="/services"><i class="fas fa-spa"></i> Dịch Vụ</a>
+          <a routerLink="/blog"><i class="fas fa-blog"></i> Blog <br /> </a>
+        </ng-template>
+      </ng-template>
+    </ng-template>
+  </nav>
+</aside>
+
+<style>
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+  }
+
+  .menu {
+    flex: 1;
+    padding: 0.6rem 0;
+  }
+
+  .menu a {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.8rem;
+    color: #2c3e50;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 2px solid transparent;
+    font-size: 0.85rem;
+  }
+
+  .menu a:hover {
+    background: rgba(0, 168, 232, 0.1);
+    border-left-color: #00a8e8;
+    color: #00a8e8;
+  }
+
+  .menu a i {
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+    width: 16px;
+    text-align: center;
+  }
+
+  .sidebar-video {
+    width: 100%;
+    padding: 0.4rem;
+    margin: 0 auto;
+    margin-top: auto;
+    background: #fff;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+
+  .video-container {
+    position: relative;
+    width: 100%;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+
+  .video-container:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .video-container video {
+    width: 100%;
+    display: block;
+    border-radius: 4px;
+    object-fit: cover;
+    aspect-ratio: 16/9;
+  }
+
+  .video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .video-container:hover .video-overlay {
+    opacity: 1;
+  }
+
+  .video-overlay i {
+    color: white;
+    font-size: 1.8rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  @media (max-width: 768px) {
+    .sidebar-video {
+      padding: 0.3rem;
+    }
+
+    .video-container {
+      border-radius: 3px;
+    }
+
+    .video-container video {
+      border-radius: 3px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const videos = document.querySelectorAll("video");
+    videos.forEach((video) => {
+      video.muted = true;
+      video.volume = 0;
+      video.addEventListener("play", function () {
+        this.muted = true;
+        this.volume = 0;
+      });
+    });
+  });
+</script>

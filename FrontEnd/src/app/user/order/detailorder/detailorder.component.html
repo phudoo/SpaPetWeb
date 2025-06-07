@@ -1,0 +1,62 @@
+<div class="order-detail-container">
+  <div class="header">
+    <button class="btn btn-secondary" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i> Quay lại
+    </button>
+    <h2>Chi tiết đơn hàng</h2>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <i class="fas fa-spinner fa-spin"></i> Đang tải thông tin đơn hàng...
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!loading && order" class="order-detail">
+    <div class="order-header">
+      <div class="order-info">
+        <h3>Đơn hàng #{{ order.id }}</h3>
+        <p class="order-date"><i class="far fa-calendar-alt"></i> {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+      <div class="status-badge" [ngClass]="getStatusClass(order.status)">
+        {{ getStatusText(order.status) }}
+      </div>
+    </div>
+
+    <div class="order-content">
+      <div class="delivery-info">
+        <h4><i class="fas fa-truck"></i> Thông tin giao hàng</h4>
+        <div class="info-content">
+          <p><i class="fas fa-map-marker-alt"></i> {{ order.address }}</p>
+          <p><i class="fas fa-phone"></i> {{ order.phone }}</p>
+        </div>
+      </div>
+
+      <div class="order-items">
+        <h4><i class="fas fa-shopping-cart"></i> Chi tiết sản phẩm</h4>
+        <table>
+          <thead>
+            <tr>
+              <th>Sản phẩm</th>
+              <th class="text-right">Số lượng</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of order.items">
+              <td>{{ item.productName || 'Sản phẩm #' + item.productId }}</td>
+              <td class="text-right">{{ item.quantity }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="total-label">Tổng cộng:</td>
+              <td class="total-amount">{{ order.totalAmount | number:'1.0-0' }}₫</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

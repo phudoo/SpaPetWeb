@@ -1,0 +1,134 @@
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f9ff 0%, #e6f3ff 100%);
+  padding: 1rem;
+}
+
+.register-box {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(77, 148, 255, 0.1);
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  border: 1px solid #e6f3ff;
+}
+
+h2 {
+  color: #2c3e50;
+  font-size: 1.2rem;
+  margin-bottom: 1.2rem;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.input-group {
+  text-align: left;
+}
+
+label {
+  display: block;
+  color: #2c3e50;
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+  font-size: 0.85rem;
+  font-family: 'Quicksand', sans-serif;
+}
+
+input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #e6f3ff;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  background: #f5f9ff;
+  font-family: 'Quicksand', sans-serif;
+}
+
+input:focus {
+  outline: none;
+  border-color: #4d94ff;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(77, 148, 255, 0.1);
+}
+
+button {
+  width: 100%;
+  padding: 0.6rem;
+  background: #4d94ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.4rem;
+  font-family: 'Quicksand', sans-serif;
+}
+
+button:hover {
+  background: #0066cc;
+  transform: translateY(-1px);
+}
+
+.login-link {
+  margin-top: 0.8rem;
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.login-link a {
+  color: #4d94ff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.login-link a:hover {
+  color: #0066cc;
+}
+
+.error-message {
+  color: #dc3545;
+  background: #fff5f5;
+  padding: 0.5rem;
+  border-radius: 6px;
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  border: 1px solid #ffe4ee;
+}
+
+@media (max-width: 768px) {
+  .register-container {
+    padding: 0.8rem;
+  }
+
+  .register-box {
+    padding: 1.2rem;
+  }
+
+  h2 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  input {
+    padding: 0.5rem 0.7rem;
+  }
+
+  label {
+    font-size: 0.8rem;
+  }
+}

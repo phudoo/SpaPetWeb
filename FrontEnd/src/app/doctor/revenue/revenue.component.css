@@ -1,0 +1,263 @@
+.revenue-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .revenue-type-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .revenue-type-controls button {
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .revenue-type-controls button.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+
+  .view-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .view-controls button {
+    padding: 10px 20px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .view-controls button.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+  }
+
+  .filter-section {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #666;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .btn-primary {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .stats-card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .total-revenue {
+    font-size: 2em;
+    color: #28a745;
+    margin: 10px 0;
+  }
+
+  .date-range,
+  .appointment-count {
+    color: #666;
+    font-size: 0.9em;
+  }
+
+  .revenue-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .revenue-table th,
+  .revenue-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .revenue-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+  }
+
+  .summary-row {
+    background-color: #f8f9fa;
+    font-weight: 500;
+  }
+
+  .summary-row td {
+    border-top: 2px solid #dee2e6;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    display: inline-block;
+  }
+
+  .status-badge.completed {
+    background-color: #28a745;
+    color: white;
+  }
+
+  .status-badge.pending {
+    background-color: #ffc107;
+    color: black;
+  }
+
+  .status-badge.cancelled {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .status-badge.in-progress {
+    background-color: #17a2b8;
+    color: white;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 40px;
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 10px;
+  }
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .error {
+    color: #dc3545;
+    text-align: center;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .date-range,
+  .monthly,
+  .yearly {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .date-range .form-group,
+  .monthly .form-group,
+  .yearly .form-group {
+    flex: 1;
+  }
+
+  .stats-details {
+    margin: 15px 0;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 4px;
+  }
+
+  .stats-details div {
+    margin: 5px 0;
+    color: #666;
+    font-size: 0.95em;
+  }
+
+  .stats-details div:first-child {
+    color: #495057;
+    font-weight: 500;
+  }
+
+  .button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .btn-success {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .btn-success:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+  }
+
+  .btn-success i {
+    font-size: 1.1em;
+  }
+
+  .appointment-details {
+    margin-top: 30px;
+  }
+
+  .date-section {
+    margin-bottom: 30px;
+  }
+
+  .date-section h4 {
+    color: #666;
+    margin-bottom: 15px;
+  }

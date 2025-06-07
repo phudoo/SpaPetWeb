@@ -1,0 +1,73 @@
+<div class="orders-container">
+  <h2 class="page-title">Danh sách đơn hàng của bạn</h2>
+
+  <div *ngIf="loading" class="loading">
+    <i class="fas fa-spinner fa-spin"></i> Đang tải danh sách đơn hàng...
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+  </div>
+
+  <div *ngIf="!loading && orders.length === 0" class="empty-state">
+    <i class="fas fa-shopping-bag"></i>
+    <p>Bạn chưa có đơn hàng nào.</p>
+  </div>
+
+  <div *ngIf="!loading && orders.length > 0" class="orders-grid">
+    <div *ngFor="let order of orders" class="order-card">
+      <div class="order-header">
+        <div class="order-info">
+          <h3>Đơn hàng #{{ order.id }}</h3>
+          <p class="order-date"><i class="far fa-calendar-alt"></i> {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+        </div>
+        <div class="status-badge" [ngClass]="getStatusClass(order.status)">
+          {{ getStatusText(order.status) }}
+        </div>
+      </div>
+
+      <div class="order-content">
+        <div class="order-items">
+          <table>
+            <thead>
+              <tr>
+                <th>Sản phẩm</th>
+                <th class="text-right">Số lượng</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of order.items">
+                <td>{{ item.productName || 'Sản phẩm #' + item.productId }}</td>
+                <td class="text-right">{{ item.quantity }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3" class="total-label">Tổng cộng:</td>
+                <td class="total-amount">{{ order.totalAmount | number:'1.0-0' }}₫</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="delivery-info">
+          <p><i class="fas fa-map-marker-alt"></i> {{ order.address }}</p>
+          <p><i class="fas fa-phone"></i> {{ order.phone }}</p>
+        </div>
+
+        <div class="order-actions">
+          <button class="btn btn-primary" (click)="viewOrderDetails(order.id)">
+            <i class="fas fa-eye"></i> Xem chi tiết
+          </button>
+          <button *ngIf="canCancelOrder(order.status)" 
+                  class="btn btn-danger" 
+                  (click)="cancelOrder(order.id)"
+                  [disabled]="cancelingOrderId === order.id">
+            <i class="fas fa-times"></i> 
+            {{ cancelingOrderId === order.id ? 'Đang hủy...' : 'Hủy đơn hàng' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,11 @@
+<div class="album-container">
+  <h2>All Albums</h2>
+  <div class="album-grid">
+    <div *ngFor="let album of albums" class="album-item" [routerLink]="['/album', album.id]">
+      <img [src]="imageUrls[album.id!]" 
+           [alt]="album.description"
+           class="album-image">
+      <p class="album-description">{{ album.description }}</p>
+    </div>
+  </div>
+</div>

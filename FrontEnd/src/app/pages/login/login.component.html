@@ -1,0 +1,67 @@
+<div class="login-container">
+  <div class="login-box">
+    <img src="assets/logo.png" alt="Logo" class="logo" /> 
+    <h1>T.VET Clinic - Quy Nhơn <br /><span class="sub-title">Trung Tâm Thú Cưng</span></h1>
+    <h2>Đăng Nhập</h2>
+
+    <form (ngSubmit)="onSubmit()">
+      <div class="input-group">
+        <input
+          type="text"
+          [(ngModel)]="username"
+          name="username"
+          placeholder="Tên Tài Khoản"
+          required
+        />
+      </div>
+
+      <div class="input-group">
+        <input
+          type="password"
+          [(ngModel)]="password"
+          name="password"
+          placeholder="Mật khẩu"
+          required
+        />
+      </div>
+
+      <button type="submit">Đăng Nhập</button>
+
+      <p class="register-text">
+        Chưa có tài khoản?
+        <a routerLink="/register">Đăng Ký</a>
+      </p>
+
+      <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+    </form>
+  </div>
+   <img src="assets/dog1.png" alt="Dog" class="pet dog" />
+  <img src="assets/cat1.png" alt="Cat" class="pet cat" /> 
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

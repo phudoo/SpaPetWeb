@@ -1,0 +1,151 @@
+<div class="chat-container">
+  <div class="chat-sidebar">
+    <div class="sidebar-header">
+      <h2>Messages</h2>
+    </div>
+    <div class="user-list">
+      <div *ngIf="usersList.length === 0" class="no-users">
+        Loading users...
+      </div>
+      <div
+        *ngFor="let user of usersList"
+        (click)="selectUser(user.id)"
+        [class.active]="receiverId === user.id"
+        class="user-item"
+      >
+        <div class="user-avatar">
+          {{ (user.fullName || user.username || 'U').charAt(0).toUpperCase() }}
+        </div>
+        <div class="user-info">
+          <div class="user-name">{{ user.fullName || user.username || 'User ' + user.id }}</div>
+          <div class="user-status" [class.online]="true">Online</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-main">
+    <div class="chat-header" *ngIf="receiverId">
+      <div class="selected-user">
+        <div class="user-avatar">
+          {{ getSelectedUserInitial() }}
+        </div>
+        <div class="user-info">
+          <div class="user-name">{{ getSelectedUserName() }}</div>
+          <div class="user-status" [class.online]="true">Online</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-content" [class.no-chat]="!receiverId">
+      <div *ngIf="!receiverId" class="no-chat-selected">
+        <div class="welcome-message">
+          <h2>Welcome to Chat</h2>
+          <p>Select a user to start chatting</p>
+        </div>
+      </div>
+
+      <div *ngIf="receiverId" class="message-container" #messageContainer>
+        <div *ngIf="messages.length === 0" class="no-messages">
+          No messages yet. Start a conversation!
+        </div>
+        <div
+          *ngFor="let msg of messages"
+          [ngClass]="{
+            message: true,
+            sent: msg.senderId === userId,
+            received: msg.senderId !== userId
+          }"
+        >
+          <div class="message-content">
+            <span class="sender">{{ msg.senderName || "Unknown" }}</span>
+            <span class="text" *ngIf="!msg.isSticker">{{ msg.message }}</span>
+            <img
+              *ngIf="msg.isSticker"
+              [src]="msg.message"
+              class="message-sticker"
+              alt="sticker"
+            />
+            <span class="time">{{
+              msg.createdAt ? (msg.createdAt | date : "HH:mm:ss") : ""
+            }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-container" *ngIf="receiverId">
+        <div class="input-group">
+          <button class="picker-btn" (click)="togglePicker()">😊</button>
+          <input
+            type="text"
+            [(ngModel)]="currentMessage"
+            (keyup)="handleKeyPress($event)"
+            placeholder="Type your message"
+          />
+          <button (click)="sendMessage()" [disabled]="!isConnected">
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emoji & Sticker Picker -->
+  <div class="picker-container" [class.show]="showPicker">
+    <div class="picker-tabs">
+      <button
+        [class.active]="activeTab === 'emoji'"
+        (click)="setActiveTab('emoji')"
+      >
+        Emoji
+      </button>
+      <button
+        [class.active]="activeTab === 'sticker'"
+        (click)="setActiveTab('sticker')"
+      >
+        Sticker
+      </button>
+    </div>
+
+    <!-- Emoji Section -->
+    <div class="picker-section" *ngIf="activeTab === 'emoji'">
+      <div class="picker-header">
+        <h3>Emojis</h3>
+        <button class="close-btn" (click)="togglePicker()">×</button>
+      </div>
+      <div class="emoji-list">
+        <span
+          *ngFor="let emoji of emojis"
+          (click)="addEmoji(emoji)"
+          class="emoji-item"
+        >
+          {{ emoji }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Sticker Section -->
+    <div class="picker-section" *ngIf="activeTab === 'sticker'">
+      <div class="picker-header">
+        <h3>Stickers</h3>
+        <button class="close-btn" (click)="togglePicker()">×</button>
+      </div>
+      <div class="sticker-list">
+        <div
+          *ngFor="let sticker of stickers"
+          (click)="sendSticker(sticker)"
+          class="sticker-item"
+        >
+          <img [src]="sticker" alt="sticker" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Debug information -->
+  <div class="debug-info" *ngIf="!isConnected">
+    <p>Status: {{ isConnected ? "Connected" : "Disconnected" }}</p>
+    <p>User ID: {{ userId || "Not logged in" }}</p>
+    <p>Receiver ID: {{ receiverId || "Not set" }}</p>
+  </div>
+</div>

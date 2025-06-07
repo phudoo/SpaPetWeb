@@ -1,0 +1,87 @@
+<div class="product-detail-container">
+  <div *ngIf="product; else loading" class="product-detail">
+    <div class="product-header">
+      <h2>Chi tiết sản phẩm</h2>
+    </div>
+    
+    <div class="product-content">
+      <div class="product-gallery">
+        <div class="product-image">
+          <img [src]="product.imageUrl || 'assets/images/no-image.png'" alt="{{ product.name }}">
+        </div>
+        <div class="product-thumbnails">
+          <div class="thumbnail active">
+            <img [src]="product.imageUrl || 'assets/images/no-image.png'" alt="Thumbnail 1">
+          </div>
+          <div class="thumbnail">
+            <img [src]="product.imageUrl || 'assets/images/no-image.png'" alt="Thumbnail 2">
+          </div>
+          <div class="thumbnail">
+            <img [src]="product.imageUrl || 'assets/images/no-image.png'" alt="Thumbnail 3">
+          </div>
+        </div>
+      </div>
+      
+      <div class="product-info">
+        <div class="product-header-info">
+          <h3 class="product-name">{{ product.name }}</h3>
+          <div class="product-rating">
+            <span class="stars">★★★★★</span>
+          </div>
+        </div>
+        
+        <div class="product-price">
+          <span class="price-label">Giá:</span>
+          <span class="price-value">{{ product.price | number:'1.0-0' }} VND</span>
+          <span class="price-discount">-20%</span>
+        </div>
+
+        <div class="product-meta">
+          <div class="meta-item">
+            <i class="fas fa-truck"></i>
+            <span>Miễn phí vận chuyển</span>
+          </div>
+          <div class="meta-item">
+            <i class="fas fa-undo"></i>
+            <span>Đổi trả trong 30 ngày</span>
+          </div>
+        </div>
+
+        <div class="product-description">
+          <h4>Mô tả sản phẩm</h4>
+          <p>{{ product.description }}</p>
+        </div>
+
+        <div class="product-actions">
+          <div class="quantity-selector">
+            <button class="quantity-btn minus" (click)="decreaseQuantity()">-</button>
+            <input type="number" [(ngModel)]="quantity" readonly>
+            <button class="quantity-btn plus" (click)="increaseQuantity()">+</button>
+          </div>
+          
+          <div class="action-buttons">
+            <button 
+              class="btn btn-add-cart" 
+              (click)="addToCart()"
+            >
+              <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+            </button>
+            
+
+          </div>
+
+          <div *ngIf="error" class="alert alert-danger mt-3">
+            {{ error }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #loading>
+    <div class="loading">
+      <div class="spinner"></div>
+      <p>Đang tải thông tin sản phẩm...</p>
+    </div>
+  </ng-template>
+</div>

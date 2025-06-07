@@ -1,0 +1,228 @@
+<div class="gioithieu-container">
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Chăm sóc thú cưng như chính người thân yêu!</h1>
+      <div class="hero-buttons">
+        <a class="btn-primary" (click)="checkLoginAndNavigate()" style="text-decoration: none; cursor: pointer;">
+          Đặt lịch ngay
+        </a>
+        <a class="btn-secondary" routerLink="/services" style="text-decoration: none;">Dịch Vụ</a>
+      </div>
+    </div>
+    <div class="hero-image">
+      <img src="/assets/gioithieu.jpg" alt="Thú cưng đang được chăm sóc" />
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section class="services-section">
+    <h2>Dịch vụ của chúng tôi</h2>
+    <div class="services-grid">
+      <div *ngIf="loading.services" class="loading-spinner">
+        Đang tải dịch vụ...
+      </div>
+      <div *ngFor="let service of services" class="service-card">
+        <i class="fas fa-spa"></i>
+        <h3>{{ service.name }}</h3>
+        <p>{{ service.description }}</p>
+        <div class="service-price">{{ service.price | currency : "VND" }}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section class="pricing-section">
+    <h2>Bảng giá dịch vụ</h2>
+    <div class="pricing-tabs">
+      <button class="tab-btn active">Chó</button>
+      <button class="tab-btn">Mèo</button>
+    </div>
+    <div class="pricing-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Gói dịch vụ</th>
+            <th>Dịch vụ bao gồm</th>
+            <th>Giá</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let service of services">
+            <td>{{ service.name }}</td>
+            <td>{{ service.description }}</td>
+            <td>{{ service.price | currency : "VND" }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section class="gallery-section">
+    <h2>Thư viện hình ảnh</h2>
+    <div class="gallery-grid">
+      <div
+        *ngFor="let product of paginatedProducts"
+        class="gallery-item"
+        (click)="viewProductDetail(product.id)"
+        [class.loading]="loading.products"
+      >
+        <img [src]="product.imageUrl" [alt]="product.name" />
+        <div class="gallery-item-overlay">
+          <span class="product-name">{{ product.name }}</span>
+          <span class="product-price">{{
+            product.price | currency : "VND"
+          }}</span>
+          <button class="view-details-btn">Xem chi tiết</button>
+        </div>
+      </div>
+    </div>
+    <!-- Product Pagination -->
+    <div class="pagination" *ngIf="totalProductPages > 1">
+      <button 
+        class="pagination-btn" 
+        [disabled]="currentProductPage === 1"
+        (click)="changeProductPage(currentProductPage - 1)">
+        &lt;
+      </button>
+      <button 
+        *ngFor="let page of [].constructor(totalProductPages); let i = index"
+        class="pagination-btn"
+        [class.active]="currentProductPage === i + 1"
+        (click)="changeProductPage(i + 1)">
+        {{i + 1}}
+      </button>
+      <button 
+        class="pagination-btn"
+        [disabled]="currentProductPage === totalProductPages"
+        (click)="changeProductPage(currentProductPage + 1)">
+        &gt;
+      </button>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="testimonials-section">
+    <h2>Khách hàng nói gì về chúng tôi</h2>
+    <div class="testimonials-grid">
+      <div *ngIf="loading.reviews" class="loading-spinner">
+        Đang tải đánh giá...
+      </div>
+      <div *ngFor="let review of reviews" class="testimonial-card">
+        <div class="rating">
+          <i
+            *ngFor="let star of [1, 2, 3, 4, 5]"
+            class="fas"
+            [class.fa-star]="star <= review.rating"
+            [class.fa-star-half-alt]="
+              star === review.rating && review.rating % 1 !== 0
+            "
+            [class.far]="star > review.rating"
+          >
+          </i>
+        </div>
+        <p class="quote">"{{ review.comment }}"</p>
+        <p class="author">- Khách hàng</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog Section -->
+  <section class="blog-section">
+    <h2>Tin tức & Blog</h2>
+    <div class="blog-grid">
+      <div *ngIf="loading.blogs" class="loading-spinner">
+        Đang tải bài viết...
+      </div>
+      <div *ngFor="let blog of paginatedBlogs" class="blog-card">
+        <h3>{{ blog.title }}</h3>
+        <p>{{ blog.content | slice : 0 : 150 }}...</p>
+        <a href="#" class="read-more">Đọc thêm</a>
+      </div>
+    </div>
+    <!-- Blog Pagination -->
+    <div class="pagination" *ngIf="totalBlogPages > 1">
+      <button 
+        class="pagination-btn" 
+        [disabled]="currentBlogPage === 1"
+        (click)="changeBlogPage(currentBlogPage - 1)">
+        &lt;
+      </button>
+      <button 
+        *ngFor="let page of [].constructor(totalBlogPages); let i = index"
+        class="pagination-btn"
+        [class.active]="currentBlogPage === i + 1"
+        (click)="changeBlogPage(i + 1)">
+        {{i + 1}}
+      </button>
+      <button 
+        class="pagination-btn"
+        [disabled]="currentBlogPage === totalBlogPages"
+        (click)="changeBlogPage(currentBlogPage + 1)">
+        &gt;
+      </button>
+    </div>
+  </section>
+
+  <div class="gioithieu-header">
+    <h1>Về Chúng Tôi</h1>
+    <p class="slogan">Tận tâm - Chuyên nghiệp - Đẳng cấp quốc tế</p>
+  </div>
+
+  <section class="story-section">
+    <h2>Câu chuyện hình thành</h2>
+    <p>
+      T.Vet Spa được thành lập từ niềm đam mê và tình yêu vô bờ bến dành cho thú
+      cưng. Chúng tôi mong muốn xây dựng một không gian nơi mọi thú cưng đều
+      được chăm sóc như thành viên trong gia đình, với dịch vụ chuyên nghiệp,
+      hiện đại và tận tâm nhất.
+    </p>
+  </section>
+
+  <section class="vision-section">
+    <h2>Tầm nhìn &amp; Sứ mệnh</h2>
+    <div class="vision-mission">
+      <div>
+        <h3>Tầm nhìn</h3>
+        <p>
+          Trở thành hệ thống spa thú cưng hàng đầu Việt Nam và vươn tầm quốc tế.
+        </p>
+      </div>
+      <div>
+        <h3>Sứ mệnh</h3>
+        <p>
+          Đem lại trải nghiệm chăm sóc toàn diện, an toàn và hạnh phúc cho thú
+          cưng, đồng hành cùng khách hàng trên hành trình nuôi dưỡng và yêu
+          thương thú cưng.
+        </p>
+      </div>
+    </div>
+    <h3>Giá trị cốt lõi</h3>
+    <ul class="core-values">
+      <li>Chuyên nghiệp &amp; tận tâm</li>
+      <li>Yêu thương như gia đình</li>
+      <li>Đổi mới &amp; sáng tạo</li>
+      <li>Minh bạch &amp; trách nhiệm</li>
+    </ul>
+  </section>
+
+  <section class="team-section">
+    <h2>Đội ngũ của chúng tôi</h2>
+    <div class="team-list">
+      <div class="team-member">
+        <img src="/assets/bacsi1.jpg" alt="Bác sĩ thú y" />
+        <p>Bác sĩ Trần Văn A<br /><span>Bác sĩ trưởng</span></p>
+      </div>
+      <div class="team-member">
+        <img src="/assets/bacsi2.jpg" alt="Chuyên gia Grooming" />
+        <p>Nguyễn Thị B<br /><span>Chuyên gia Grooming</span></p>
+      </div>
+      <div class="team-member">
+        <img src="/assets/nhanvien1.jpg" alt="Nhân viên chăm sóc" />
+        <p>Lê Văn C<br /><span>Nhân viên chăm sóc</span></p>
+      </div>
+      <!-- Thêm thành viên khác nếu muốn -->
+    </div>
+  </section>
+</div>

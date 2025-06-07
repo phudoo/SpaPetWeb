@@ -1,0 +1,51 @@
+.admin-menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.menu-section {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.menu-section h3 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 1.2em;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.menu-section button {
+  display: block;
+  width: 100%;
+  margin: 8px 0;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.menu-section button:hover {
+  background: #e9ecef;
+  transform: translateY(-2px);
+}
+
+.menu-section a {
+  text-decoration: none;
+  color: #495057;
+  display: block;
+  width: 100%;
+}
+
+.menu-section button:hover a {
+  color: #007bff;
+}

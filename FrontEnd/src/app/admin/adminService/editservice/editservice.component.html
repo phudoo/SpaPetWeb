@@ -1,0 +1,15 @@
+<h2>Chỉnh sửa User</h2>
+<button><a routerLink="/adduser">Thêm Mới Tài Khoản</a></button>
+
+<form *ngIf="service" (ngSubmit)="onSubmit()">
+  <label>Id:</label>
+  <input type="text" [value]="service.name" disabled /><br />
+
+  <label>Username:</label>
+  <input type="text" [(ngModel)]="service.description" name="username" /><br />
+
+  <label>Password:</label>
+  <input type="password" [(ngModel)]="service.price" name="password" /><br />
+
+  <button type="submit">Lưu</button>
+</form>

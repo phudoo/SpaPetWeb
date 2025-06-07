@@ -1,0 +1,41 @@
+<div class="layout-container">
+  <!-- HEADER -->
+  <app-header></app-header>
+
+  <!-- BODY -->
+  <div class="layout-body">
+    <!-- SIDEBAR -->
+    <app-sidebar></app-sidebar>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <app-footer></app-footer>
+
+  <!-- Social Media Icons -->
+  <div class="social-icons">
+    <a href="https://www.facebook.com/lyhanmi/about" target="_blank" class="social-icon">
+      <img src="assets/facebook.png" alt="Facebook" class="icon">
+    </a>
+    <a href="https://tiktok.com" target="_blank" class="social-icon">
+      <img src="assets/tiktok.png" alt="TikTok" class="icon">
+    </a>
+    <a href="https://zalo.me" target="_blank" class="social-icon">
+      <img src="assets/zalo.png" alt="Zalo" class="icon">
+    </a>
+  </div>
+
+  <!-- Scroll to Top Button -->
+  <button class="scroll-top" (click)="scrollToTop()">
+    <img src="assets/images/scroll-top.png" alt="Scroll to top" class="scroll-icon">
+  </button>
+
+  <!-- Additional Scroll to Top Button -->
+  <button class="scroll-top-alt" (click)="scrollToTop()">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+</div>

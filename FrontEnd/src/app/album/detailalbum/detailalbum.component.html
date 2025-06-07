@@ -1,0 +1,18 @@
+<div class="detail-container" *ngIf="album">
+  <div class="header-actions">
+    <button class="btn-back" (click)="goBack()">
+      <i class="fas fa-arrow-left"></i> Back
+    </button>
+  </div>
+  <div class="image-container">
+    <div *ngIf="!imageUrl">Loading image...</div>
+    <img *ngIf="imageUrl" 
+         [src]="imageUrl" 
+         [alt]="album.description"
+         class="detail-image">
+    <p class="detail-description">{{ album.description }}</p>
+  </div>
+</div>
+<div *ngIf="!album">
+  Loading album details...
+</div>

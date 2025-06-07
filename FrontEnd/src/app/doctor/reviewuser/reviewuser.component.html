@@ -1,0 +1,51 @@
+<div class="container mt-4">
+  <h2 class="mb-4">{{ isServiceReviews ? 'Đánh giá dịch vụ' : 'Đánh giá của người dùng' }}</h2>
+
+  <div *ngIf="loading" class="text-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger" role="alert">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error">
+    <div *ngIf="reviews.length === 0" class="alert alert-info">
+      Chưa có đánh giá nào.
+    </div>
+
+    <div *ngIf="isServiceReviews && reviews.length > 0" class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Tổng quan đánh giá</h5>
+        <div class="d-flex align-items-center">
+          <div class="display-4 me-3">{{ calculateAverageRating() | number:'1.1-1' }}</div>
+          <div class="rating">
+            <span *ngFor="let star of getStars(Math.round(calculateAverageRating()))" class="text-warning">★</span>
+            <span *ngFor="let star of getStars(5 - Math.round(calculateAverageRating()))" class="text-muted">☆</span>
+          </div>
+          <span class="ms-3 text-muted">({{ reviews.length }} đánh giá)</span>
+        </div>
+      </div>
+    </div>
+
+    <div *ngFor="let review of reviews" class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <h5 class="card-title">{{ isServiceReviews ? review.userName : review.serviceName }}</h5>
+          <div class="rating">
+            <span *ngFor="let star of getStars(review.rating)" class="text-warning">★</span>
+            <span *ngFor="let star of getStars(5 - review.rating)" class="text-muted">☆</span>
+          </div>
+        </div>
+        <p class="card-text">{{ review.comment }}</p>
+        <div class="text-muted small">
+          <span *ngIf="isServiceReviews">Người đánh giá: {{ review.userName }}</span>
+          <span *ngIf="!isServiceReviews">Dịch vụ: {{ review.serviceName }}</span>
+          <span class="ms-3">Ngày: {{ review.createdAt | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

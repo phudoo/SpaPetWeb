@@ -1,0 +1,289 @@
+<div class="admin-container">
+  <div class="header">
+    <h2>Quản lý sản phẩm</h2>
+    <button class="btn btn-primary">
+      <a routerLink="/admin/addproduct">
+        <i class="fas fa-plus"></i> Thêm sản phẩm mới
+      </a>
+    </button>
+  </div>
+
+  <div *ngIf="products.length > 0; else noProducts" class="products-grid">
+    <div class="product-card" *ngFor="let product of products">
+      <div class="product-image">
+        <img [src]="getImageUrl(product)" [alt]="product.name" (error)="handleImageError($event)">
+      </div>
+      
+      <div class="product-info">
+        <div class="product-header">
+          <h3>ID: {{ product.id }}</h3>
+          <h3>{{ product.name }}</h3>
+        </div>
+
+        <div class="product-details">
+          <p class="price">Giá: {{ product.price | number:'1.0-0' }} VND</p>
+          <p class="description">Mô tả: {{ product.description }}</p>
+          <p class="stock">Số lượng tồn kho: {{ product.stock }}</p>
+        </div>
+
+        <div class="stock-control">
+          <div class="input-group">
+            <label for="quantity-{{ product.id }}">Nhập số lượng:</label>
+            <input 
+              id="quantity-{{ product.id }}" 
+              type="number" 
+              [(ngModel)]="product.updateQuantity" 
+              placeholder="Nhập số lượng"
+              class="form-control"
+            />
+          </div>
+          <div class="button-group">
+        <button 
+  class="btn btn-secondary" 
+  (click)="updateStock(product.id, product.updateQuantity!)">
+  <i class="fas fa-save"></i> Cập nhật
+</button>
+
+            <button class="btn btn-info" (click)="updateStock(product.id, 10)">
+              <i class="fas fa-plus"></i> +10
+            </button>
+            <button class="btn btn-warning" (click)="updateStock(product.id, -10)">
+              <i class="fas fa-minus"></i> -10
+            </button>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn btn-primary">
+            <a [routerLink]="['/admin/editproduct', product.id]">
+              <i class="fas fa-edit"></i> Sửa
+            </a>
+          </button>
+          <button class="btn btn-danger" (click)="deleteProduct(product.id)">
+            <i class="fas fa-trash"></i> Xóa
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noProducts>
+    <div class="no-products">
+      <p>Không có sản phẩm nào để hiển thị.</p>
+    </div>
+  </ng-template>
+</div>
+
+<style>
+.admin-container {
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.product-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.product-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  position: relative;
+  background: #f8f9fa;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.product-card:hover .product-image img {
+  transform: scale(1.05);
+}
+
+.product-info {
+  padding: 15px;
+}
+
+.product-header {
+  margin-bottom: 10px;
+}
+
+.product-header h3 {
+  margin: 5px 0;
+  font-size: 1.1rem;
+}
+
+.product-details {
+  margin-bottom: 15px;
+}
+
+.product-details p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+}
+
+.price {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.stock {
+  color: #dc3545;
+}
+
+.stock-control {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.input-group {
+  margin-bottom: 10px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+}
+
+.btn a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.btn-info {
+  background-color: #17a2b8;
+  color: white;
+}
+
+.btn-info:hover {
+  background-color: #138496;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800;
+}
+
+.btn-danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+}
+
+.no-products {
+  text-align: center;
+  padding: 40px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  color: #6c757d;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+</style>

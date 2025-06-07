@@ -1,0 +1,13 @@
+<h2>Thêm Người Dùng</h2>
+<form (ngSubmit)="onsubmit()">
+  <label>Tên Dịch Vụ</label>
+  <input type="text" name="name" [(ngModel)]="name" /><br /><br />
+
+  <label>Mô Tả</label>
+  <input type="text" name="description" [(ngModel)]="description" /><br /><br />
+
+  <label>Giá</label>
+  <input type="text" name="price" [(ngModel)]="price" /><br /><br />
+  <button type="submit">Thêm</button>
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+</form>

@@ -1,0 +1,75 @@
+<div class="card">
+  <h2>Đặt đơn hàng</h2>
+
+  <!-- Hiển thị sản phẩm đã chọn -->
+  <div *ngIf="items.length > 0" class="list-item">
+    <h3>Sản phẩm đã chọn:</h3>
+    <ul>
+      <li *ngFor="let item of items" class="list-item">
+        <div class="form-group">
+          <div class="product-info">
+            <span class="product-name">{{ item.productName }}</span>
+            <span class="product-quantity">Số lượng: {{ item.quantity }}</span>
+            <span class="product-price">{{ item.price | number:'1.0-0' }}₫</span>
+            <span class="product-total">Tổng: {{ (item.price * item.quantity) | number:'1.0-0' }}₫</span>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <div class="order-total">
+      <strong>Tổng tiền đơn hàng:</strong>
+      <span>{{ calculateTotal() | number:'1.0-0' }}₫</span>
+    </div>
+  </div>
+
+  <form (ngSubmit)="submitOrder()" #orderForm="ngForm">
+    <div class="form-group">
+      <label for="address">Địa chỉ:</label>
+      <input 
+        type="text" 
+        id="address"
+        name="address" 
+        [(ngModel)]="address" 
+        required
+        minlength="5"
+        #addressInput="ngModel"
+        class="form-control"
+        placeholder="Nhập địa chỉ giao hàng">
+      <div *ngIf="addressInput.invalid && (addressInput.dirty || addressInput.touched)" class="error-message">
+        <div *ngIf="addressInput.errors?.['required']">Địa chỉ là bắt buộc</div>
+        <div *ngIf="addressInput.errors?.['minlength']">Địa chỉ phải có ít nhất 5 ký tự</div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="phone">Số điện thoại:</label>
+      <input 
+        type="text" 
+        id="phone"
+        name="phone" 
+        [(ngModel)]="phone" 
+        required
+        pattern="[0-9]{10}"
+        #phoneInput="ngModel"
+        class="form-control"
+        placeholder="Nhập số điện thoại">
+      <div *ngIf="phoneInput.invalid && (phoneInput.dirty || phoneInput.touched)" class="error-message">
+        <div *ngIf="phoneInput.errors?.['required']">Số điện thoại là bắt buộc</div>
+        <div *ngIf="phoneInput.errors?.['pattern']">Số điện thoại phải có 10 chữ số</div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" [disabled]="orderForm.invalid || items.length === 0">
+      Đặt đơn
+    </button>
+  </form>
+
+  <div *ngIf="orderResult" class="list-item">
+    <h3>Đặt đơn thành công!</h3>
+    <pre>{{ orderResult | json }}</pre>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+</div>

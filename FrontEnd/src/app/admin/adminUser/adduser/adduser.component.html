@@ -1,0 +1,30 @@
+<h2>Thêm Người Dùng</h2>
+<form (ngSubmit)="onsubmit()">
+  <label>Tên Đăng Nhập:</label>
+  <input type="text" name="username" [(ngModel)]="username" /><br /><br />
+
+  <label>Mật Khẩu:</label>
+  <input type="password" name="password" [(ngModel)]="password" /><br /><br />
+
+  <label>Họ Và Tên:</label>
+  <input type="text" name="fullname" [(ngModel)]="fullName" /><br /><br />
+
+  <label>Email:</label>
+  <input type="email" name="email" [(ngModel)]="email" /><br /><br />
+
+  <label>Số Điện Thoại:</label>
+  <input type="text" name="phone" [(ngModel)]="phone" /><br /><br />
+
+  <label>Địa Chỉ:</label>
+  <input type="text" name="address" [(ngModel)]="address" /><br /><br />
+
+  <label> Vai Trò: </label>
+
+  <select [(ngModel)]="roleId" name="roleId" required>
+    <option [value]="1">User</option>
+    <option [value]="2">Admin</option>
+    <option [value]="3">Admin</option>
+  </select>
+  <button type="submit">Thêm</button>
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+</form>

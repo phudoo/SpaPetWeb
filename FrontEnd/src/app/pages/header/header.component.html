@@ -1,0 +1,74 @@
+<header class="header">
+  <div class="header-left">
+    <img src="assets/logo.png" alt="Logo" class="logo-img" />
+    <span class="system-title">T.VET Clinic - Quy Nhơn</span>
+  </div>
+  <div class="header-center">
+    <nav
+      class="main-nav"
+      *ngIf="!userRole || (userRole !== 'admin' && userRole !== 'doctor')"
+    >
+      <a routerLink="/interface" class="nav-item">Trang Chủ</a>
+      <a routerLink="/about" class="nav-item">Giới Thiệu</a>
+      <a routerLink="/allproduct" class="nav-item">Sản Phẩm</a>
+      <a routerLink="/services" class="nav-item">Dịch Vụ</a>
+      <a routerLink="/blog" class="nav-item">Blog</a>
+      <a *ngIf="!userName" routerLink="/contact" class="nav-item">Liên Hệ</a>
+      <a routerLink="/allalbum" class="nav-item"> Thư Viện Ảnh</a>
+    </nav>
+  </div>
+  <div class="header-right">
+    <ng-container *ngIf="userName; else guest">
+      <div class="user-info">
+        <div class="profile-dropdown" (click)="toggleDropdown()">
+          <img src="assets/profile.png" class="user-avatar" />
+          <span>{{ userName }}</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="dropdown-menu" [class.show]="isDropdownOpen">
+          <ng-container *ngIf="userRole === 'doctor'">
+            <a routerLink="/chat/chatrealtime" class="dropdown-item">
+              <i class="fas fa-envelope"></i> Tin Nhắn
+            </a>
+            <button (click)="logout()" class="dropdown-item logout">
+              <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+            </button>
+          </ng-container>
+          <ng-container *ngIf="userRole === 'admin'">
+            <a routerLink="/admin/products" class="dropdown-item">
+              <i class="fas fa-box"></i> Quản lý sản phẩm
+            </a>
+          
+            <div class="dropdown-divider"></div>
+            <button (click)="logout()" class="dropdown-item logout">
+              <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+            </button>
+          </ng-container>
+          <ng-container *ngIf="userRole !== 'admin' && userRole !== 'doctor'">
+            <a routerLink="/chat/chatrealtime" class="dropdown-item">
+              <i class="fas fa-envelope"></i> Tin Nhắn
+            </a>
+            <a routerLink="/listmypets" class="dropdown-item">
+              <i class="fas fa-paw"></i> Danh sách thú cưng
+            </a>
+            <a routerLink="/allcart" class="dropdown-item">
+              <i class="fas fa-shopping-cart"></i> Giỏ hàng
+            </a>
+            <a routerLink="/myorder" class="dropdown-item">
+              <i class="fas fa-box"></i> Đơn hàng
+            </a>
+            <div class="dropdown-divider"></div>
+   
+            <button (click)="logout()" class="dropdown-item logout">
+              <i class="fas fa-sign-out-alt"></i> Đăng Xuất
+            </button>
+          </ng-container>
+        </div>
+      </div>
+    </ng-container>
+    <ng-template #guest>
+      <a routerLink="/login" class="btn btn-secondary btn-auth">Đăng Nhập</a>
+      <a routerLink="/register" class="btn btn-primary btn-auth">Đăng Ký</a>
+    </ng-template>
+  </div>
+</header>

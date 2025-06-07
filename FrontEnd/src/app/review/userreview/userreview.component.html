@@ -1,0 +1,200 @@
+<div class="review-container">
+  <h2>⭐ Đánh giá dịch vụ</h2>
+
+  <div *ngIf="loading" class="loading">
+    Đang tải thông tin...
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="successMessage" class="success-message">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="appointment && !loading" class="appointment-info">
+    <h3>Thông tin lịch hẹn</h3>
+    <p><strong>Thú cưng:</strong> {{ appointment.petName }}</p>
+    <p><strong>Ngày hẹn:</strong> {{ appointment.appointmentDate | date:'short' }}</p>
+  </div>
+
+  <div *ngIf="services.length > 0" class="services-list">
+    <div *ngFor="let service of services" class="service-review">
+      <h3>{{ service.name }}</h3>
+      <div class="rating-input">
+        <label>Đánh giá:</label>
+        <div class="stars">
+          <i *ngFor="let star of [1,2,3,4,5]" 
+             class="fas fa-star" 
+             [class.active]="star <= (service.rating || 0)"
+             (click)="service.rating = star">
+          </i>
+        </div>
+      </div>
+      <div class="comment-input">
+        <label for="comment-{{service.id}}">Nhận xét:</label>
+        <textarea 
+          id="comment-{{service.id}}" 
+          [(ngModel)]="service.comment" 
+          placeholder="Nhập nhận xét của bạn về dịch vụ này..."
+          rows="3">
+        </textarea>
+      </div>
+    </div>
+    <div class="submit-all-container">
+      <button 
+        class="submit-all-btn" 
+        (click)="submitAllReviews()"
+        [disabled]="!canSubmitAll()">
+        Gửi tất cả đánh giá
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && services.length === 0" class="no-services">
+    Không có dịch vụ nào để đánh giá
+  </div>
+</div>
+
+<style>
+.review-container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1rem;
+}
+
+h2 {
+  color: #333;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.appointment-info {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+}
+
+.appointment-info h3 {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.service-review {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+
+.service-review h3 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.rating-input, .comment-input {
+  margin-bottom: 1rem;
+}
+
+.rating-input label, .comment-input label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #666;
+}
+
+.stars {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  color: #e0e0e0;
+  cursor: pointer;
+}
+
+.stars i.active {
+  color: #ffc107;
+}
+
+textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.submit-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.submit-btn:hover {
+  background: #0056b3;
+}
+
+.submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.error-message {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.success-message {
+  background: #d4edda;
+  color: #155724;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.no-services {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+}
+
+.submit-all-container {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.submit-all-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.3s;
+  font-size: 1.1rem;
+}
+
+.submit-all-btn:hover {
+  background: #218838;
+}
+
+.submit-all-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+</style>

@@ -1,0 +1,401 @@
+<div class="card">
+  <h2>📅 Danh sách lịch hẹn của bạn</h2>
+
+  <div *ngIf="loading" class="loading">
+    Đang tải danh sách lịch hẹn...
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>🐾 Tên Thú Cưng</th>
+          <th>👤 Chủ Thú Cưng</th>
+          <th>🕒 Ngày Hẹn</th>
+          <th>📌 Trạng Thái</th>
+          <th>💼 Dịch Vụ</th>
+          <th>💰 Tổng tiền</th>
+          <th>🔍 Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let appoi of appointments">
+          <td>{{ appoi.petName }}</td>
+          <td>{{ appoi.petOwnerName }}</td>
+          <td>{{ appoi.appointmentDate | date:'short' }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="{
+              'status-pending': appoi.status === 'PENDING',
+              'status-confirmed': appoi.status === 'CONFIRMED',
+              'status-done': appoi.status === 'COMPLETED'
+            }">{{ appoi.status }}</span>
+          </td>
+          <td>
+            <span *ngFor="let s of appoi.services; let last = last">
+              {{ s }}<span *ngIf="!last">, </span>
+            </span>
+          </td>
+          <td>{{ getTotalPrice(appoi.services) | number }} VNĐ</td>
+          <td class="action-buttons">
+            <button class="btn btn-secondary" (click)="viewAppointmentDetails(appoi.id)">
+              Chi tiết
+            </button>
+            <ng-container *ngIf="appoi.status === 'COMPLETED'">
+              <button *ngIf="!hasReviewedAllServices(appoi)" 
+                      class="btn btn-primary" 
+                      (click)="navigateToReview(appoi.id)">
+                Đánh giá
+              </button>
+              <span *ngIf="hasReviewedAllServices(appoi)" class="reviewed-badge">
+                <i class="fas fa-check"></i>Đã đánh giá
+              </span>
+            </ng-container>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h2>⭐ Đánh giá của bạn</h2>
+  <p class="sort-info">(Sắp xếp theo thứ tự mới nhất)</p>
+
+  <div *ngIf="loading" class="loading">
+    Đang tải danh sách đánh giá...
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>🐾 Thú cưng</th>
+          <th>💼 Dịch vụ</th>
+          <th>⭐ Đánh giá</th>
+          <th>💬 Nhận xét</th>
+          <th>📅 Ngày hẹn</th>
+          <th>⏰ Ngày đánh giá</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let review of reviews">
+          <td>
+            <div class="pet-info">
+              <span class="pet-name">{{ review.appointment.pet.name }}</span>
+              <span class="pet-details">
+                {{ review.appointment.pet.species }} - {{ review.appointment.pet.breed }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <div class="service-info">
+              <span class="service-name">{{ review.service.name }}</span>
+              <span class="service-price">{{ review.service.price | number }} VNĐ</span>
+            </div>
+          </td>
+          <td>
+            <div class="rating">
+              <i *ngFor="let star of [1,2,3,4,5]" 
+                 class="fas fa-star" 
+                 [class.active]="star <= review.rating">
+              </i>
+            </div>
+          </td>
+          <td>{{ review.comment }}</td>
+          <td>{{ review.appointment.appointmentDate | date:'short' }}</td>
+          <td>{{ review.createdAt | date:'short' }}</td>
+        </tr>
+        <tr *ngIf="reviews.length === 0">
+          <td colspan="6" class="no-reviews">
+            Bạn chưa có đánh giá nào
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+.card {
+  padding: 0.5rem;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin: 0.5rem;
+}
+
+h2 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.75rem;
+}
+
+th, td {
+  padding: 0.25rem 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  white-space: nowrap;
+}
+
+th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.75rem;
+}
+
+tr:hover {
+  background-color: #f8f9fa;
+}
+
+.status-badge {
+  padding: 0.15rem 0.35rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.status-pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-confirmed {
+  background-color: #cce5ff;
+  color: #004085;
+}
+
+.status-done {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.15rem;
+}
+
+.btn {
+  padding: 0.15rem 0.35rem;
+  font-size: 0.7rem;
+  border-radius: 3px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.loading {
+  text-align: center;
+  padding: 0.5rem;
+  color: #666;
+  font-size: 0.75rem;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 0.25rem;
+  border-radius: 3px;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 1rem;
+  border-radius: 4px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.rating {
+  display: flex;
+  gap: 0.15rem;
+  font-size: 1rem;
+  color: #e0e0e0;
+  cursor: pointer;
+}
+
+.rating i.active {
+  color: #ffc107;
+}
+
+.form-group {
+  margin-bottom: 0.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.15rem;
+  font-size: 0.75rem;
+}
+
+textarea {
+  width: 100%;
+  padding: 0.25rem;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 0.75rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.reviewed-badge {
+  display: inline-block;
+  padding: 0.15rem 0.35rem;
+  background-color: #d4edda;
+  color: #155724;
+  border-radius: 3px;
+  font-size: 0.7rem;
+  margin-left: 0.15rem;
+}
+
+.reviewed-badge i {
+  margin-right: 0.15rem;
+}
+
+.no-reviews {
+  text-align: center;
+  padding: 1rem;
+  color: #666;
+  font-style: italic;
+}
+
+.rating {
+  display: flex;
+  gap: 0.15rem;
+  font-size: 0.9rem;
+}
+
+.rating i {
+  color: #e0e0e0;
+}
+
+.rating i.active {
+  color: #ffc107;
+}
+
+.pet-info, .service-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.pet-name, .service-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.pet-details, .service-price {
+  font-size: 0.7rem;
+  color: #666;
+}
+
+td {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sort-info {
+  font-size: 0.75rem;
+  color: #666;
+  margin: -0.25rem 0 0.5rem 0;
+  font-style: italic;
+}
+
+.appointment-details {
+  margin: 1rem 0;
+}
+
+.detail-group {
+  margin-bottom: 0.75rem;
+}
+
+.detail-group label {
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.detail-group span {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.service-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.service-list li {
+  padding: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.total-price {
+  font-weight: 600;
+  color: #28a745;
+  font-size: 1rem;
+}
+
+.note {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 3px;
+}
+</style>

@@ -1,0 +1,98 @@
+<div class="container">
+  <div class="card">
+    <div class="card-body">
+      <h2 class="card-title">Thêm vào giỏ hàng</h2>
+
+      <div *ngIf="loading" class="loading">
+        <div class="spinner"></div>
+      </div>
+
+      <div *ngIf="error" class="alert">
+        {{ error }}
+      </div>
+
+      <div *ngIf="!loading && product" class="product-details">
+        <div class="product-content">
+          <div class="product-image">
+            <img [src]="product.imageUrl" [alt]="product.name">
+          </div>
+          
+          <div class="product-info">
+            <h3>{{ product.name }}</h3>
+            <p class="product-id">ID: {{ product.id }}</p>
+            <p class="price">{{ product.price | number:'1.0-0' }} VND</p>
+            <p class="description">{{ product.description }}</p>
+            <p class="stock">Còn lại: {{ product.stock }} sản phẩm</p>
+
+            <div class="quantity-controls">
+              <label>Số lượng:</label>
+              <div class="quantity-selector">
+                <button class="quantity-btn" (click)="decreaseQuantity()">-</button>
+                <input type="text" [(ngModel)]="quantity" readonly>
+                <button class="quantity-btn" (click)="increaseQuantity()">+</button>
+              </div>
+            </div>
+
+            <div class="total-price">
+              <span>Tổng tiền:</span>
+              <strong>{{ (product.price * quantity) | number:'1.0-0' }} VND</strong>
+            </div>
+
+            <div class="action-buttons">
+              <button class="btn btn-primary" (click)="addToCart()">
+                <i class="fas fa-cart-plus"></i> Thêm vào giỏ
+              </button>
+              <button class="btn btn-secondary" routerLink="/allproduct">
+                Tiếp tục mua sắm
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.product-image {
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.price {
+  font-size: 1.5rem;
+  color: #28a745;
+  font-weight: bold;
+}
+
+.description {
+  margin: 1rem 0;
+}
+
+.stock {
+  color: #dc3545;
+}
+
+.quantity-controls {
+  margin: 1rem 0;
+}
+
+.quantity-controls label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.total-price {
+  font-size: 1.2rem;
+  color: #28a745;
+}
+
+.btn {
+  padding: 0.5rem 1rem;
+}
+
+.btn i {
+  margin-right: 0.5rem;
+}
+</style>

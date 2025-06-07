@@ -1,0 +1,51 @@
+<div class="contacts-container">
+  <h2>Danh Sách Liên Hệ</h2>
+
+  <div *ngIf="loading" class="loading">
+    Đang tải dữ liệu...
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    {{ error }}
+  </div>
+
+  <div *ngIf="!loading && !error" class="contacts-table">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Họ và tên</th>
+          <th>Email</th>
+          <th>Điện thoại</th>
+          <th>Tiêu đề</th>
+          <th>Trạng thái</th>
+          <th>Ngày tạo</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let contact of contacts">
+          <td>{{ contact.id }}</td>
+          <td>{{ contact.fullName }}</td>
+          <td>{{ contact.email }}</td>
+          <td>{{ contact.phone }}</td>
+          <td>{{ contact.subject }}</td>
+          <td>
+            <select 
+              [value]="contact.status" 
+              (change)="onStatusChange(contact.id, $event)"
+              [class]="getStatusClass(contact.status)">
+              <option *ngFor="let status of statusOptions" [value]="status" [selected]="status === contact.status">
+                {{ status }}
+              </option>
+            </select>
+          </td>
+          <td>{{ contact.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>
+            <a [routerLink]="['/detailcontact', contact.id]" class="view-btn">Xem chi tiết</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

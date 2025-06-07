@@ -1,0 +1,94 @@
+<div class="card">
+  <div class="edit-header">
+    <h2><i class="fas fa-edit"></i> Cập nhật thông tin thú cưng</h2>
+    <a routerLink="/listmypets" class="btn btn-secondary">
+      <i class="fas fa-arrow-left"></i> Quay lại
+    </a>
+  </div>
+
+  <form [formGroup]="petForm" (ngSubmit)="onSubmit()" class="edit-form">
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="name"><i class="fas fa-tag"></i> Tên thú cưng</label>
+        <input 
+          id="name" 
+          formControlName="name" 
+          class="form-control" 
+          placeholder="Nhập tên thú cưng"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="species"><i class="fas fa-dog"></i> Loài</label>
+        <input 
+          id="species" 
+          formControlName="species" 
+          class="form-control" 
+          placeholder="Nhập loài"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="breed"><i class="fas fa-dna"></i> Giống</label>
+        <input 
+          id="breed" 
+          formControlName="breed" 
+          class="form-control" 
+          placeholder="Nhập giống"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="birthday"><i class="fas fa-calendar"></i> Ngày sinh</label>
+        <input 
+          id="birthday" 
+          type="date" 
+          formControlName="birthday" 
+          class="form-control" 
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="sex"><i class="fas fa-venus-mars"></i> Giới tính</label>
+        <select id="sex" formControlName="sex" class="form-control">
+          <option value="">Chọn giới tính</option>
+          <option value="Male">Đực</option>
+          <option value="Female">Cái</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="image-section">
+      <div class="current-image">
+        <label><i class="fas fa-image"></i> Ảnh hiện tại</label>
+        <div class="img-container" *ngIf="currentImageUrl">
+          <img [src]="currentImageUrl" alt="Pet Image" />
+        </div>
+        <div class="no-image" *ngIf="!currentImageUrl">
+          <i class="fas fa-image"></i>
+          <p>Chưa có ảnh</p>
+        </div>
+      </div>
+
+      <div class="new-image">
+        <label for="newImage"><i class="fas fa-upload"></i> Chọn ảnh mới</label>
+        <div class="file-input-wrapper">
+          <input 
+            id="newImage" 
+            type="file" 
+            (change)="onFileChange($event)" 
+            class="form-control" 
+            accept="image/*"
+          />
+          <small class="form-text">Chọn ảnh mới để thay thế ảnh hiện tại</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        <i class="fas fa-save"></i> Lưu thay đổi
+      </button>
+    </div>
+  </form>
+</div>

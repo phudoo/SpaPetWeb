@@ -1,0 +1,17 @@
+<h2>Danh sách User</h2>
+<button> <a routerLink="/addservice">Thêm Dịch Vụ </a> </button>
+<table border="1">
+  <tr>
+    <th>username</th>
+    <th>password</th>
+    <th>emai</th>
+  </tr>
+  <tr *ngFor="let service of services">
+    <td>{{ service.name }}</td>
+    <td>{{ service.description }}</td>
+    <td>{{ service.price }}</td>
+    <td> <a [routerLink]="['/detailservice', service.id]"> Xem chi tiết</a></td>
+    <td><a [routerLink]="['/editservice', service.id]"> Sửa </a>  </td>
+    <td> <button (click)="deleteService(service.id)">Xoá</button> </td>
+  </tr>
+</table>

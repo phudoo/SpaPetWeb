@@ -1,0 +1,72 @@
+<div class="card">
+  <div class="card-header">
+    <h2><i class="fas fa-paw"></i> Danh sách thú cưng của bạn</h2>
+    <a routerLink="/addpet" class="add-pet-btn">
+      <i class="fas fa-plus"></i> Thêm thú cưng mới
+    </a>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>Ảnh</th>
+          <th>Tên</th>
+          <th>Loài</th>
+          <th>Giống</th>
+          <th>Ngày sinh</th>
+          <th>Giới tính</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let pet of pets">
+          <td>
+            <div class="img-container">
+              <img *ngIf="pet.imageUrl; else defaultImage" 
+                   [src]="pet.imageUrl" 
+                   [alt]="pet.name" />
+              <ng-template #defaultImage>
+                <img src="assets/default-pet-image.png" 
+                     alt="Default Pet Image" />
+              </ng-template>
+            </div>
+          </td>
+          <td>{{ pet.name }}</td>
+          <td>{{ pet.species }}</td>
+          <td>{{ pet.breed }}</td>
+          <td>{{ pet.birthday | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <span class="gender-badge" [class.male]="pet.sex === 'Male'" [class.female]="pet.sex === 'Female'">
+              {{ pet.sex === 'Male' ? 'Đực' : 'Cái' }}
+            </span>
+          </td>
+          <td>
+            <div class="form-group">
+              <a class="btn btn-secondary" [routerLink]="['/editpet', pet.id]" title="Sửa thông tin">
+                <i class="fas fa-edit"></i> Sửa
+              </a>
+              <a class="btn btn-secondary" [routerLink]="['/detailpet', pet.id]" title="Xem chi tiết">
+                <i class="fas fa-eye"></i> Chi tiết
+              </a>
+              <button class="btn btn-danger" (click)="deletemypet(pet.id)" title="Xóa thú cưng">
+                <i class="fas fa-trash"></i> Xóa
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="pets.length === 0">
+          <td colspan="7" class="no-data">
+            <div class="empty-state">
+              <i class="fas fa-paw"></i>
+              <p>Bạn chưa có thú cưng nào. Hãy thêm thú cưng mới!</p>
+              <a routerLink="/addpet" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Thêm thú cưng
+              </a>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

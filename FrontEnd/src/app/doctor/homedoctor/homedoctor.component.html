@@ -1,0 +1,127 @@
+<div class="card">
+  <div class="header">
+    <h2>📅 Danh sách Lịch Hẹn</h2>
+   
+  </div>
+
+  <!-- Bộ lọc -->
+  <div class="filters">
+    <div class="filter-group">
+      <label>
+        <i class="fas fa-calendar"></i>
+        <input type="date" [(ngModel)]="filterDate" class="filter-input">
+        <button class="btn btn-sm btn-secondary" (click)="filterByDate()">Lọc</button>
+      </label>
+    </div>
+
+    <div class="filter-group">
+      <label>
+        <i class="fas fa-calendar-alt"></i>
+        <input type="number" min="1" max="12" [(ngModel)]="filterMonth" placeholder="Tháng" class="filter-input small">
+        <input type="number" min="2000" max="2100" [(ngModel)]="filterYear" placeholder="Năm" class="filter-input small">
+        <button class="btn btn-sm btn-secondary" (click)="filterByMonth()">Lọc</button>
+      </label>
+    </div>
+
+    <div class="filter-group">
+      <label>
+        <i class="fas fa-filter"></i>
+        <select [(ngModel)]="filterStatus" class="filter-input">
+          <option value="">--Chọn--</option>
+          <option value="PENDING">Chờ xác nhận</option>
+          <option value="SCHEDULED">Đã xác nhận</option>
+          <option value="COMPLETED">Đã hoàn thành</option>
+          <option value="CANCELLED">Đã huỷ</option>
+        </select>
+        <button class="btn btn-sm btn-secondary" (click)="filterByStatus()">Lọc</button>
+      </label>
+    </div>
+
+    <button class="btn btn-sm btn-primary" (click)="loadAppointments()">
+      <i class="fas fa-sync"></i> Tất cả
+    </button>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>🐾 Tên Thú Cưng</th>
+          <th>👤 Chủ Thú Cưng</th>
+          <th>🕒 Ngày Hẹn</th>
+          <th>📝 Ghi Chú</th>
+          <th>📌 Trạng Thái</th>
+          <th>💼 Dịch Vụ</th>
+          <th>🔧 Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let appoi of paginatedAppointments">
+          <td>{{ appoi.id }}</td>
+          <td>{{ appoi.petName }}</td>
+          <td>{{ appoi.petOwnerName }}</td>
+          <td>{{ appoi.appointmentDate | date:'short' }}</td>
+          <td>{{ appoi.note }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="{
+              'status-pending': appoi.status === 'PENDING',
+              'status-scheduled': appoi.status === 'SCHEDULED',
+              'status-completed': appoi.status === 'COMPLETED',
+              'status-cancelled': appoi.status === 'CANCELLED'
+            }">{{ appoi.status }}</span>
+          </td>
+          <td>
+            <span *ngFor="let s of appoi.services; let last = last">
+              {{ s }}<span *ngIf="!last">, </span>
+            </span>
+          </td>
+          <td class="actions">
+            <!-- Xác nhận lịch hẹn (PENDING -> SCHEDULED) -->
+            <button *ngIf="appoi.status === 'PENDING'" 
+                    class="btn btn-success" 
+                    (click)="confirmAppointment(appoi.id)">
+              <i class="fas fa-check"></i> Xác nhận
+            </button>
+
+            <!-- Đánh dấu hoàn thành (SCHEDULED -> COMPLETED) -->
+            <button *ngIf="appoi.status === 'SCHEDULED'" 
+                    class="btn btn-primary" 
+                    (click)="markCompleted(appoi.id)">
+              <i class="fas fa-check-double"></i> Hoàn thành
+            </button>
+
+            <!-- Huỷ lịch hẹn (PENDING/SCHEDULED -> CANCELLED) -->
+            <button *ngIf="appoi.status === 'PENDING' || appoi.status === 'SCHEDULED'" 
+                    class="btn btn-danger" 
+                    (click)="cancelAppointment(appoi.id)">
+              <i class="fas fa-times"></i> Huỷ
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button class="btn btn-sm" 
+            [disabled]="currentPage === 1"
+            (click)="goToPage(currentPage - 1)">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    
+    <button class="btn btn-sm" 
+            *ngFor="let page of getPageNumbers()"
+            [class.active]="page === currentPage"
+            (click)="goToPage(page)">
+      {{ page }}
+    </button>
+    
+    <button class="btn btn-sm"
+            [disabled]="currentPage === totalPages"
+            (click)="goToPage(currentPage + 1)">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
+</div>

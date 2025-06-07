@@ -1,0 +1,377 @@
+<div class="revenue-container">
+  <div class="revenue-type-controls">
+    <button
+      [class.active]="revenueType === 'appointments'"
+      (click)="setRevenueType('appointments')"
+    >
+      Doanh thu lịch hẹn
+    </button>
+    <button
+      [class.active]="revenueType === 'products'"
+      (click)="setRevenueType('products')"
+    >
+      Doanh thu sản phẩm
+    </button>
+  </div>
+
+  <div class="view-controls">
+    <button
+      [class.active]="viewMode === 'range'"
+      (click)="setViewMode('range')"
+    >
+      Theo khoảng thời gian
+    </button>
+    <button
+      [class.active]="viewMode === 'monthly'"
+      (click)="setViewMode('monthly')"
+    >
+      Theo tháng
+    </button>
+    <button
+      [class.active]="viewMode === 'yearly'"
+      (click)="setViewMode('yearly')"
+    >
+      Theo năm
+    </button>
+  </div>
+
+  <div class="filter-section">
+    <form [formGroup]="revenueForm" (ngSubmit)="loadRevenueData()">
+      <!-- Date Range View -->
+      <div *ngIf="viewMode === 'range'" class="date-range">
+        <div class="form-group">
+          <label for="startDate">Từ ngày</label>
+          <input
+            type="date"
+            id="startDate"
+            formControlName="startDate"
+            class="form-control"
+          />
+        </div>
+        <div class="form-group">
+          <label for="endDate">Đến ngày</label>
+          <input
+            type="date"
+            id="endDate"
+            formControlName="endDate"
+            class="form-control"
+          />
+        </div>
+      </div>
+
+      <!-- Monthly View -->
+      <div *ngIf="viewMode === 'monthly'" class="monthly">
+        <div class="form-group">
+          <label for="month">Tháng</label>
+          <select id="month" formControlName="month" class="form-control">
+            <option
+              *ngFor="let m of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]"
+              [value]="m"
+            >
+              Tháng {{ m }}
+            </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="year">Năm</label>
+          <input
+            type="number"
+            id="year"
+            formControlName="year"
+            class="form-control"
+          />
+        </div>
+      </div>
+
+      <!-- Yearly View -->
+      <div *ngIf="viewMode === 'yearly'" class="yearly">
+        <div class="form-group">
+          <label for="year">Năm</label>
+          <input
+            type="number"
+            id="year"
+            formControlName="year"
+            class="form-control"
+          />
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary">Xem thống kê</button>
+        <button
+          type="button"
+          class="btn btn-success"
+          (click)="exportToExcel()"
+          [disabled]="loading"
+        >
+          <i class="fas fa-file-excel"></i> Xuất Excel
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    <p>Đang tải dữ liệu...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error">
+    {{ error }}
+  </div>
+
+  <!-- Revenue Statistics -->
+  <div *ngIf="!loading && !error" class="revenue-stats">
+    <!-- Appointment Revenue Views -->
+    <ng-container *ngIf="revenueType === 'appointments'">
+      <!-- Date Range View -->
+      <div *ngIf="viewMode === 'range' && revenueStats" class="stats-card">
+        <h3>Tổng doanh thu</h3>
+        <div class="total-revenue">
+          {{ formatCurrency(revenueStats.totalRevenue) }}
+        </div>
+        <div class="stats-details">
+          <div>
+            Số lịch hẹn đã hoàn thành:
+            {{ revenueStats.totalCompletedAppointments }}
+          </div>
+        </div>
+        <div class="date-range">
+          {{ revenueStats.startDate | date : "dd/MM/yyyy" }} -
+          {{ revenueStats.endDate | date : "dd/MM/yyyy" }}
+        </div>
+      </div>
+
+      <!-- Detailed Revenue Table for Range -->
+      <div
+        *ngIf="
+          viewMode === 'range' && (revenueStats?.appointments?.length || 0) > 0
+        "
+        class="detailed-revenue"
+      >
+        <h3>Chi tiết doanh thu</h3>
+        <table class="revenue-table">
+          <thead>
+            <tr>
+              <th>Ngày</th>
+              <th>Thú cưng</th>
+              <th>Chủ sở hữu</th>
+              <th>Dịch vụ</th>
+              <th>Doanh thu</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let appointment of revenueStats?.appointments || []">
+              <td>
+                {{ appointment.appointmentDate | date : "dd/MM/yyyy HH:mm" }}
+              </td>
+              <td>{{ appointment.petName }}</td>
+              <td>{{ appointment.ownerName }}</td>
+              <td>
+                <div *ngFor="let service of appointment.services">
+                  {{ service.serviceName }} ({{
+                    formatCurrency(service.price)
+                  }})
+                </div>
+              </td>
+              <td>{{ formatCurrency(appointment.appointmentRevenue) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Monthly View -->
+      <div *ngIf="viewMode === 'monthly' && monthlyRevenue" class="stats-card">
+        <h3>
+          Doanh thu tháng
+        </h3>
+        <div class="total-revenue">
+          {{ formatCurrency(monthlyRevenue.totalRevenue) }}
+        </div>
+
+      </div>
+
+      <!-- Yearly View -->
+      <div *ngIf="viewMode === 'yearly' && yearlyRevenue" class="stats-card">
+        <h3>Doanh thu năm </h3>
+        <div class="total-revenue">
+          {{ formatCurrency(yearlyRevenue.totalRevenue) }}
+        </div>
+      </div>
+
+      <!-- Detailed Revenue Table for Monthly -->
+      <div
+        *ngIf="viewMode === 'monthly' && (monthlyAppointments?.length || 0) > 0"
+        class="detailed-revenue"
+      >
+        <h3>Chi tiết doanh thu</h3>
+        <table class="revenue-table">
+          <thead>
+            <tr>
+              <th>Ngày</th>
+              <th>Thú cưng</th>
+              <th>Chủ sở hữu</th>
+              <th>Dịch vụ</th>
+              <th>Doanh thu</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let appointment of monthlyAppointments || []">
+              <td>
+                {{ appointment.appointmentDate | date : "dd/MM/yyyy HH:mm" }}
+              </td>
+              <td>{{ appointment.petName }}</td>
+              <td>{{ appointment.ownerName }}</td>
+              <td>
+                <div *ngFor="let service of appointment.services">
+                  {{ service.serviceName }} ({{
+                    formatCurrency(service.price)
+                  }})
+                </div>
+              </td>
+              <td>{{ formatCurrency(appointment.appointmentRevenue) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Detailed Revenue Table for Yearly -->
+      <div
+        *ngIf="viewMode === 'yearly' && (yearlyAppointments?.length || 0) > 0"
+        class="detailed-revenue"
+      >
+        <h3>Chi tiết doanh thu</h3>
+        <table class="revenue-table">
+          <thead>
+            <tr>
+              <th>Ngày</th>
+              <th>Thú cưng</th>
+              <th>Chủ sở hữu</th>
+              <th>Dịch vụ</th>
+              <th>Doanh thu</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let appointment of yearlyAppointments || []">
+              <td>
+                {{ appointment.appointmentDate | date : "dd/MM/yyyy HH:mm" }}
+              </td>
+              <td>{{ appointment.petName }}</td>
+              <td>{{ appointment.ownerName }}</td>
+              <td>
+                <div *ngFor="let service of appointment.services">
+                  {{ service.serviceName }} ({{
+                    formatCurrency(service.price)
+                  }})
+                </div>
+              </td>
+              <td>{{ formatCurrency(appointment.appointmentRevenue) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Monthly Breakdown -->
+      <div
+        *ngIf="viewMode === 'yearly' && yearlyRevenue"
+        class="monthly-breakdown"
+      >
+      
+      </div>
+    </ng-container>
+
+    <!-- Product Revenue Views -->
+    <ng-container *ngIf="revenueType === 'products'">
+      <!-- Date Range View -->
+      <div
+        *ngIf="viewMode === 'range' && productRevenueStats"
+        class="stats-card"
+      >
+        <h3>Tổng doanh thu sản phẩm</h3>
+        <div class="total-revenue">
+          {{ formatCurrency(productRevenueStats.totalRevenue) }}
+        </div>
+        <div class="date-range">
+          {{ productRevenueStats.startDate | date : "dd/MM/yyyy" }} -
+          {{ productRevenueStats.endDate | date : "dd/MM/yyyy" }}
+        </div>
+      </div>
+
+      <!-- Detailed Product Revenue Table (for all views) -->
+      <div
+        *ngIf="productRevenueStats && productRevenueStats.products && productRevenueStats.products.length > 0"
+        class="detailed-revenue"
+      >
+        <h3>Chi tiết doanh thu sản phẩm</h3>
+        <table class="revenue-table">
+          <thead>
+            <tr>
+              <th>Sản phẩm</th>
+              <th>Đơn giá</th>
+              <th>Số lượng</th>
+              <th>Doanh thu</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let product of productRevenueStats.products">
+              <td>{{ product.productName }}</td>
+              <td>{{ formatCurrency(product.price) }}</td>
+              <td>{{ product.totalQuantity }}</td>
+              <td>{{ formatCurrency(product.totalRevenue) }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="summary-row">
+              <td colspan="3">Tổng cộng</td>
+              <td>{{ formatCurrency(productRevenueStats.totalRevenue) }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- Monthly View -->
+      <div
+        *ngIf="viewMode === 'monthly' && monthlyProductRevenue"
+        class="stats-card"
+      >
+      </div>
+
+      <!-- Yearly View -->
+      <div
+        *ngIf="viewMode === 'yearly' && yearlyProductRevenue"
+        class="stats-card"
+      >
+      </div>
+
+      <!-- Monthly Breakdown -->
+      <div
+        *ngIf="viewMode === 'yearly' && yearlyProductRevenue && yearlyProductRevenue.monthlyBreakdown"
+        class="monthly-breakdown"
+      >
+        <h3>Chi tiết theo tháng</h3>
+        <table class="revenue-table">
+          <thead>
+            <tr>
+              <th>Tháng</th>
+              <th>Doanh thu</th>
+              <th>Số sản phẩm</th>
+              <th>Số đơn hàng</th>
+              <th>Giá trị trung bình</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let month of yearlyProductRevenue.monthlyBreakdown">
+              <td>Tháng {{ month.month }}</td>
+              <td>{{ formatCurrency(month.totalRevenue) }}</td>
+              <td>{{ month.totalProducts }}</td>
+              <td>{{ month.totalOrders }}</td>
+              <td>{{ formatCurrency(month.averageOrderValue) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
+  </div>
+</div>
+

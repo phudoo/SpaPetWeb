@@ -1,0 +1,98 @@
+<div class="contact-container">
+  <div class="contact-form-wrapper">
+    <h2>Liên Hệ Với Chúng Tôi</h2>
+    
+    <div *ngIf="success" class="alert alert-success">
+      Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể.
+    </div>
+
+    <div *ngIf="error" class="alert alert-danger">
+      {{ error }}
+    </div>
+
+    <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="contact-form">
+      <div class="form-group">
+        <label for="fullName">Họ và tên *</label>
+        <input 
+          type="text" 
+          id="fullName" 
+          formControlName="fullName"
+          [ngClass]="{'is-invalid': submitted && contactForm.get('fullName')?.errors}"
+          placeholder="Nhập họ và tên của bạn">
+        <div *ngIf="submitted && contactForm.get('fullName')?.errors" class="invalid-feedback">
+          <div *ngIf="contactForm.get('fullName')?.errors?.['required']">Vui lòng nhập họ và tên</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Số điện thoại *</label>
+        <input 
+          type="tel" 
+          id="phone" 
+          formControlName="phone"
+          [ngClass]="{'is-invalid': submitted && contactForm.get('phone')?.errors}"
+          placeholder="Nhập số điện thoại của bạn">
+        <div *ngIf="submitted && contactForm.get('phone')?.errors" class="invalid-feedback">
+          <div *ngIf="contactForm.get('phone')?.errors?.['required']">Vui lòng nhập số điện thoại</div>
+          <div *ngIf="contactForm.get('phone')?.errors?.['pattern']">Số điện thoại không hợp lệ</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input 
+          type="email" 
+          id="email" 
+          formControlName="email"
+          [ngClass]="{'is-invalid': submitted && contactForm.get('email')?.errors}"
+          placeholder="Nhập email của bạn">
+        <div *ngIf="submitted && contactForm.get('email')?.errors" class="invalid-feedback">
+          <div *ngIf="contactForm.get('email')?.errors?.['required']">Vui lòng nhập email</div>
+          <div *ngIf="contactForm.get('email')?.errors?.['email']">Email không hợp lệ</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Địa chỉ *</label>
+        <input 
+          type="text" 
+          id="address" 
+          formControlName="address"
+          [ngClass]="{'is-invalid': submitted && contactForm.get('address')?.errors}"
+          placeholder="Nhập địa chỉ của bạn">
+        <div *ngIf="submitted && contactForm.get('address')?.errors" class="invalid-feedback">
+          <div *ngIf="contactForm.get('address')?.errors?.['required']">Vui lòng nhập địa chỉ</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="subject">Tiêu đề *</label>
+        <input 
+          type="text" 
+          id="subject" 
+          formControlName="subject"
+          [ngClass]="{'is-invalid': submitted && contactForm.get('subject')?.errors}"
+          placeholder="Nhập tiêu đề liên hệ">
+        <div *ngIf="submitted && contactForm.get('subject')?.errors" class="invalid-feedback">
+          <div *ngIf="contactForm.get('subject')?.errors?.['required']">Vui lòng nhập tiêu đề</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="content">Nội dung *</label>
+        <textarea 
+          id="content" 
+          formControlName="content"
+          [ngClass]="{'is-invalid': submitted && contactForm.get('content')?.errors}"
+          placeholder="Nhập nội dung liên hệ của bạn"
+          rows="5"></textarea>
+        <div *ngIf="submitted && contactForm.get('content')?.errors" class="invalid-feedback">
+          <div *ngIf="contactForm.get('content')?.errors?.['required']">Vui lòng nhập nội dung</div>
+          <div *ngIf="contactForm.get('content')?.errors?.['minlength']">Nội dung phải có ít nhất 10 ký tự</div>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn">Gửi Liên Hệ</button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,90 @@
+<div class="products-container">
+  <h2 class="products-title">Danh sách sản phẩm</h2>
+
+  <div class="filters">
+    <div class="search-box">
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm" 
+        (keyup.enter)="searchProducts()"
+        placeholder="Tìm kiếm sản phẩm..."
+        class="search-input"
+      >
+      <button class="btn btn-search" (click)="searchProducts()">
+        <i class="fas fa-search"></i>
+      </button>
+    </div>
+
+    <div class="category-filter">
+      <select 
+        [(ngModel)]="selectedCategory" 
+        (change)="onCategoryChange(selectedCategory)"
+        class="category-select"
+      >
+        <option *ngFor="let category of categories" [value]="category.value">
+          {{ category.label }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="paginatedProducts.length > 0; else noProducts" class="products-grid">
+    <div class="product-card" *ngFor="let product of paginatedProducts">
+      <div class="product-image">
+        <img [src]="getImageUrl(product)" [alt]="product.name" (error)="handleImageError($event)">
+        <div class="product-stock" [class.low-stock]="product.stock < 10">
+          {{ product.stock }} còn lại
+        </div>
+      </div>
+      <div class="product-info">
+        <h3 class="product-name">
+          <a [routerLink]="['/product', product.id]">{{ product.name }}</a>
+        </h3>
+        <p class="product-category">{{ product.category }}</p>
+        <p class="product-price">{{ product.price | number:'1.0-0' }} VND</p>
+        <button 
+          class="btn btn-add-cart" 
+          [routerLink]="['/addcart']" 
+          [queryParams]="{ id: product.id, name: product.name }"
+        >
+          <i class="fas fa-cart-plus"></i> Thêm vào giỏ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noProducts>
+    <div class="no-products">
+      <i class="fas fa-box-open"></i>
+      <p>Không có sản phẩm nào để hiển thị.</p>
+    </div>
+  </ng-template>
+
+  <!-- Pagination Controls -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button 
+      class="btn btn-page" 
+      [disabled]="currentPage === 1"
+      (click)="changePage(currentPage - 1)"
+    >
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    
+    <button 
+      *ngFor="let page of [].constructor(totalPages); let i = index"
+      class="btn btn-page"
+      [class.active]="currentPage === i + 1"
+      (click)="changePage(i + 1)"
+    >
+      {{ i + 1 }}
+    </button>
+
+    <button 
+      class="btn btn-page" 
+      [disabled]="currentPage === totalPages"
+      (click)="changePage(currentPage + 1)"
+    >
+      <i class="fas fa-chevron-right"></i>
+    </button>
+  </div>
+</div>

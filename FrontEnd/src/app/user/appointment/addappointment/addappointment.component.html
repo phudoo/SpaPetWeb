@@ -1,0 +1,659 @@
+<div class="card">
+  <h2 class="form-title">Tạo lịch hẹn mới</h2>
+
+  <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()" class="appointment-form">
+    <!-- Pet -->
+    <div class="form-group">
+      <label for="pet">Thú cưng</label>
+      <div *ngIf="pets.length > 0">
+        <select id="pet" formControlName="petId" class="form-control" [class.is-invalid]="isFormSubmitted && appointmentForm.get('petId')?.invalid">
+          <option value="">-- Chọn pet --</option>
+          <option *ngFor="let pet of pets" [value]="pet.id">{{ pet.name }}</option>
+        </select>
+        <div class="invalid-feedback" *ngIf="isFormSubmitted && appointmentForm.get('petId')?.invalid">
+          Vui lòng chọn thú cưng
+        </div>
+      </div>
+      <div *ngIf="pets.length === 0" class="no-pets-message">
+        <p>Bạn chưa có thú cưng nào. Vui lòng thêm thú cưng trước khi đặt lịch.</p>
+        <button type="button" class="btn btn-primary" (click)="navigateToAddPet()">
+          <i class="fas fa-plus"></i> Thêm thú cưng mới
+        </button>
+      </div>
+    </div>
+
+    <!-- Ngày hẹn -->
+    <div class="form-group">
+      <label for="appointmentDate">Ngày hẹn</label>
+      <div class="date-input-container">
+        <input 
+          id="appointmentDate" 
+          formControlName="appointmentDate" 
+          type="datetime-local" 
+          class="form-control"
+          [min]="minDate"
+          [max]="maxDate"
+          (change)="onDateChange($event)"
+          [ngClass]="{
+            'booked-date': isDateBooked(appointmentForm.get('appointmentDate')?.value),
+            'is-invalid': isFormSubmitted && appointmentForm.get('appointmentDate')?.invalid
+          }"
+          (click)="showCalendar = !showCalendar"
+        />
+        <div class="invalid-feedback" *ngIf="isFormSubmitted && appointmentForm.get('appointmentDate')?.invalid">
+          Vui lòng chọn ngày và giờ hẹn
+        </div>
+        
+        <!-- Calendar Table -->
+        <div class="calendar-table" *ngIf="showCalendar">
+          <div class="calendar-header">
+            <button (click)="previousMonth()"><i class="fas fa-chevron-left"></i></button>
+            <h3>{{ currentMonthName }} {{ currentYear }}</h3>
+            <button (click)="nextMonth()"><i class="fas fa-chevron-right"></i></button>
+          </div>
+          <div class="calendar-grid">
+            <div class="weekday" *ngFor="let day of weekDays">{{ day }}</div>
+            <div 
+              *ngFor="let date of calendarDates" 
+              class="calendar-date"
+              [ngClass]="{
+                'other-month': !date.isCurrentMonth,
+                'booked': isDateBooked(date.dateString),
+                'selected': date.dateString === appointmentForm.get('appointmentDate')?.value?.slice(0, 10)
+              }"
+              (click)="selectDate(date)"
+            >
+              {{ date.day }}
+              <div class="booking-indicator" *ngIf="getBookingsForDate(date.dateString).length > 0">
+                {{ getBookingsForDate(date.dateString).length }}
+              </div>
+            </div>
+          </div>
+          <div class="time-slots" *ngIf="selectedDate">
+            <h4>Chọn giờ cho ngày {{ selectedDate | date:'dd/MM/yyyy' }}</h4>
+            <div class="time-grid">
+              <div 
+                *ngFor="let time of timeSlots" 
+                class="time-slot"
+                [ngClass]="{
+                  'booked': isTimeBooked(time),
+                  'selected': appointmentForm.get('appointmentDate')?.value?.slice(11, 16) === time
+                }"
+                (click)="selectTime(time)"
+              >
+                {{ time }}
+                <div class="booking-info" *ngIf="isTimeBooked(time)">
+                  <span class="booking-count">Đã đặt</span>
+                </div>
+              </div>
+            </div>
+            <div class="calendar-actions">
+              <button type="button" class="btn btn-primary" (click)="confirmTimeSelection()">OK</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <small class="date-info">* Chỉ có thể đặt lịch trong vòng 1 tháng tới</small>
+    </div>
+
+    <!-- Ghi chú -->
+    <div class="form-group">
+      <label for="note">Ghi chú</label>
+      <input id="note" formControlName="note" type="text" class="form-control" />
+    </div>
+
+    <div class="form-group">
+      <label>Dịch vụ</label>
+      <div class="list-item">
+        <div *ngFor="let service of services" class="checkbox-item">
+          <label>
+            <input
+              type="checkbox"
+              [value]="service.id"
+              (change)="onServiceChange($event)"
+              [checked]="appointmentForm.value.serviceIds?.includes(service.id)"
+            />
+            {{ service.name }} - {{ service.price | number }} VNĐ
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <strong>Tổng tiền dịch vụ: {{ totalPrice | number }} VNĐ</strong>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Tạo lịch hẹn</button>
+  </form>
+</div>
+
+<!-- Display Booked Appointments -->
+<div class="card booked-appointments">
+  <h2>📅 Danh sách lịch hẹn đã đặt</h2>
+  
+  <div *ngIf="loading" class="loading">
+    <div class="spinner"></div>
+    Đang tải danh sách lịch hẹn...
+  </div>
+
+  <div *ngIf="bookedAppointments.length === 0 && !loading" class="no-appointments">
+    Chưa có lịch hẹn nào được đặt
+  </div>
+
+  <div class="appointments-grid" *ngIf="bookedAppointments.length > 0">
+    <div class="appointment-card" *ngFor="let app of bookedAppointments">
+      <div class="appointment-header">
+        <div class="pet-info">
+          <i class="fas fa-paw"></i>
+          <h3>{{ app.petName }}</h3>
+        </div>
+        <div class="owner-info">
+          <i class="fas fa-user"></i>
+          <span>{{ app.petOwnerName }}</span>
+        </div>
+      </div>
+      <div class="appointment-details">
+        <div class="detail-item">
+          <i class="fas fa-calendar-alt"></i>
+          <span>{{ app.appointmentDate | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="detail-item">
+          <i class="fas fa-list"></i>
+          <div class="services-list">
+            <span *ngFor="let s of app.services; let last = last">
+              {{ s }}<span *ngIf="!last">, </span>
+            </span>
+          </div>
+        </div>
+        <div class="detail-item" *ngIf="app.note">
+          <i class="fas fa-sticky-note"></i>
+          <span>{{ app.note }}</span>
+        </div>
+        <div class="detail-item">
+          <i class="fas fa-info-circle"></i>
+          <span [ngClass]="'status-' + app.status.toLowerCase()">Trạng thái: {{ app.status }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="success-modal" *ngIf="showSuccessModal">
+  <div class="modal-content">
+    <div class="success-icon">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <h3>Tạo lịch hẹn thành công!</h3>
+    <p>Lịch hẹn của bạn đã được tạo thành công.</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" (click)="viewAppointmentDetails()">Xem chi tiết</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.date-input-container {
+  position: relative;
+}
+
+.date-legend {
+  margin-top: 8px;
+  display: flex;
+  gap: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+}
+
+.legend-color.booked {
+  background-color: #ff4444;
+}
+
+.legend-color.available {
+  background-color: #4CAF50;
+}
+
+input[type="datetime-local"].booked-date {
+  border-color: #ff4444;
+  background-color: #fff5f5;
+}
+
+input[type="datetime-local"].booked-date:focus {
+  border-color: #ff4444;
+  box-shadow: 0 0 0 0.2rem rgba(255, 68, 68, 0.25);
+}
+
+.date-info {
+  color: #666;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+/* Calendar Styles */
+.calendar-table {
+  margin-top: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.calendar-header button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #007bff;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.calendar-header button:hover {
+  color: #0056b3;
+}
+
+.calendar-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.weekday {
+  text-align: center;
+  font-weight: bold;
+  color: #666;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.calendar-date {
+  position: relative;
+  padding: 8px;
+}
+
+.calendar-date:hover:not(.booked) {
+  background-color: #f0f0f0;
+}
+
+.calendar-date.booked {
+  background-color: #ff4444;
+  color: white;
+  cursor: not-allowed;
+}
+
+.calendar-date.selected {
+  background-color: #007bff;
+  color: white;
+}
+
+.calendar-date.other-month {
+  color: #ccc;
+}
+
+.time-slots {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.time-slots h4 {
+  margin: 0 0 1rem 0;
+  color: #333;
+}
+
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+
+.time-slot {
+  position: relative;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.time-slot:hover:not(.booked) {
+  background-color: #f0f0f0;
+}
+
+.time-slot.booked {
+  background-color: #ffebee;
+  border-color: #ff4444;
+  color: #ff4444;
+  cursor: not-allowed;
+}
+
+.time-slot.selected {
+  background-color: #e3f2fd;
+  border-color: #2196F3;
+  color: #2196F3;
+}
+
+.booking-info {
+  font-size: 0.8rem;
+  color: #ff4444;
+  margin-top: 4px;
+}
+
+.booking-count {
+  background-color: #ffebee;
+  padding: 2px 6px;
+  border-radius: 10px;
+  color: #ff4444;
+}
+
+/* Existing styles */
+.card {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-control {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.list-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.booked-appointments {
+  margin-top: 2rem;
+}
+
+.appointments-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.appointment-card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.appointment-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.appointment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.pet-info h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.owner-info {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.appointment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.detail-item i {
+  color: #007bff;
+  margin-top: 0.2rem;
+}
+
+.services-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.no-appointments {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+  font-style: italic;
+  font-size: 1.1rem;
+}
+
+.booking-indicator {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.status-pending {
+  color: #ffa500;
+}
+
+.status-confirmed {
+  color: #4CAF50;
+}
+
+.status-cancelled {
+  color: #ff4444;
+}
+
+.status-completed {
+  color: #2196F3;
+}
+
+.calendar-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.calendar-actions .btn {
+  min-width: 80px;
+}
+
+/* Success Modal Styles */
+.success-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.success-icon {
+  font-size: 4rem;
+  color: #4CAF50;
+  margin-bottom: 1rem;
+}
+
+.success-icon i {
+  animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes scaleIn {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.modal-content h3 {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.modal-content p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.modal-actions .btn {
+  min-width: 120px;
+}
+
+.no-pets-message {
+  text-align: center;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 0.5rem;
+}
+
+.no-pets-message p {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.no-pets-message .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.no-pets-message .btn i {
+  font-size: 1rem;
+}
+</style>

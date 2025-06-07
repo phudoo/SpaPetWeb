@@ -1,0 +1,218 @@
+<!-- Main Dashboard Container -->
+<main class="dashboard-container" role="main">
+  <!-- Header Section -->
+  <header class="dashboard-header" role="banner">
+    <div class="user-info">
+      <div class="user-avatar" role="img" aria-label="User avatar">
+        <i class="fas fa-user-circle" aria-hidden="true"></i>
+      </div>
+      <div class="user-details">
+        <h1>Xin chào, {{username}}</h1>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="notification-container">
+        <button class="notification-btn" (click)="toggleNotifications()" [attr.aria-expanded]="showNotifications">
+          <i class="fas fa-bell" aria-hidden="true"></i>
+          <span class="notification-badge" *ngIf="unreadCount > 0" role="status">{{unreadCount}}</span>
+        </button>
+        <div class="notification-dropdown" *ngIf="showNotifications" role="dialog" aria-label="Notifications">
+          <div class="notification-header">
+            <h3>📅 Thông Báo</h3>
+            <button class="close-btn" (click)="closeNotifications()" aria-label="Close notifications">
+              <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="notification-list">
+            <div *ngIf="notifications.length === 0" class="no-notifications">
+              Bạn chưa có thông báo nào
+            </div>
+            <div class="notification-messages" *ngIf="notifications.length > 0">
+              <article class="notification-message" *ngFor="let appoi of notifications" [ngClass]="{'unread': appoi.isNew}">
+                <div class="message-content">
+                  <p>
+                    Lịch hẹn của thú cưng <strong>{{ appoi.petName }}</strong> ngày <strong>{{ appoi.appointmentDate | date:'dd/MM/yyyy HH:mm' }}</strong>
+                    <span class="status-badge" [ngClass]="{
+                      'status-pending': appoi.status === 'PENDING',
+                      'status-confirmed': appoi.status === 'CONFIRMED',
+                      'status-done': appoi.status === 'COMPLETED'
+                    }" role="status">{{ getStatusText(appoi.status) }}</span>
+                    <span *ngIf="appoi.isNew" class="new-badge" role="status">Mới</span>
+                    <span *ngIf="!appoi.isNew" class="old-badge" role="status">Cũ</span>
+                  </p>
+                  <div class="message-details">
+                    <span class="service-info">
+                      <i class="fas fa-list" aria-hidden="true"></i> Dịch vụ:
+                      <span *ngFor="let s of appoi.services; let last = last">
+                        {{ s }}<span *ngIf="!last">, </span>
+                      </span>
+                    </span>
+                    <span class="price-info">
+                      <i class="fas fa-money-bill" aria-hidden="true"></i> Tổng tiền: {{ getTotalPrice(appoi.services) | number }} VNĐ
+                    </span>
+                  </div>
+                  <div class="message-actions">
+                    <button class="read-btn" (click)="navigateToAppointmentDetails(appoi.id)" aria-label="View appointment details">
+                      <i class="fas fa-eye" aria-hidden="true"></i> Xem chi tiết
+                    </button>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="dashboard-content">
+    <!-- Quick Actions -->
+    <section class="quick-actions" aria-labelledby="quick-actions-title">
+      <h2 id="quick-actions-title">Thao tác nhanh</h2>
+      <div class="action-cards">
+        <button class="action-card" (click)="navigateTo('/addappointment')" aria-label="Book appointment">
+          <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+          <h3>Đặt lịch</h3>
+          <p>Đặt lịch khám bệnh cho thú cưng</p>
+        </button>
+        <button class="action-card" (click)="navigateTo('/allappointment')" aria-label="View history">
+          <i class="fas fa-history" aria-hidden="true"></i>
+          <h3>Lịch sử</h3>
+          <p>Xem lịch sử khám bệnh</p>
+        </button>
+        <button class="action-card" (click)="navigateTo('/listmypets')" aria-label="Manage pets">
+          <i class="fas fa-paw" aria-hidden="true"></i>
+          <h3>Thú cưng</h3>
+          <p>Quản lý thông tin thú cưng</p>
+        </button>
+        <button class="action-card" (click)="navigateTo('/allproduct')" aria-label="Shop">
+          <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+          <h3>Mua sắm</h3>
+          <p>Mua sản phẩm cho thú cưng</p>
+        </button>
+      </div>
+    </section>
+
+    <!-- Dashboard Grid -->
+    <div class="dashboard-grid">
+      <!-- Upcoming Appointments -->
+      <section class="dashboard-section" aria-labelledby="upcoming-appointments-title">
+        <div class="section-header">
+          <h2 id="upcoming-appointments-title">Lịch hẹn sắp tới</h2>
+          <button class="view-all-btn" (click)="navigateTo('/allappointment')" aria-label="View all appointments">
+            <i class="fas fa-arrow-right" aria-hidden="true"></i> Xem tất cả
+          </button>
+        </div>
+        <div class="appointments-grid" *ngIf="scheduledAppointments.length > 0">
+          <article class="appointment-card" *ngFor="let appoi of scheduledAppointments">
+            <div class="appointment-header">
+              <div class="pet-info">
+                <i class="fas fa-paw" aria-hidden="true"></i>
+                <h3>{{ appoi.petName }}</h3>
+              </div>
+              <div class="owner-info">
+                <i class="fas fa-user" aria-hidden="true"></i>
+                <span>{{ appoi.petOwnerName }}</span>
+              </div>
+            </div>
+            <div class="appointment-details">
+              <div class="detail-item">
+                <i class="fas fa-calendar-alt" aria-hidden="true"></i>
+                <span>{{ appoi.appointmentDate | date:'dd/MM/yyyy HH:mm' }}</span>
+              </div>
+              <div class="detail-item">
+                <i class="fas fa-list" aria-hidden="true"></i>
+                <div class="services-list">
+                  <span *ngFor="let s of appoi.services; let last = last">
+                    {{ s }}<span *ngIf="!last">, </span>
+                  </span>
+                </div>
+              </div>
+              <div class="detail-item">
+                <i class="fas fa-money-bill" aria-hidden="true"></i>
+                <span>{{ getTotalPrice(appoi.services) | number }} VNĐ</span>
+              </div>
+            </div>
+            <div class="appointment-actions">
+              <button class="view-details-btn" (click)="navigateToAppointmentDetails(appoi.id)" aria-label="View appointment details">
+                <i class="fas fa-eye" aria-hidden="true"></i> Xem chi tiết
+              </button>
+            </div>
+          </article>
+        </div>
+        <div class="no-appointments" *ngIf="scheduledAppointments.length === 0">
+          <i class="fas fa-calendar-times" aria-hidden="true"></i>
+          <p>Bạn chưa có lịch hẹn nào</p>
+        </div>
+      </section>
+
+      <!-- Health Tips -->
+      <section class="dashboard-section health-tips" aria-labelledby="health-tips-title">
+        <div class="section-header">
+          <h2 id="health-tips-title">Lời khuyên sức khỏe</h2>
+        </div>
+        <div class="tips-container">
+          <article class="tip-card">
+            <i class="fas fa-heartbeat" aria-hidden="true"></i>
+            <h3>Chăm sóc sức khỏe</h3>
+            <p>Kiểm tra sức khỏe định kỳ cho thú cưng của bạn</p>
+          </article>
+          <article class="tip-card">
+            <i class="fas fa-utensils" aria-hidden="true"></i>
+            <h3>Dinh dưỡng</h3>
+            <p>Chế độ ăn uống cân bằng và phù hợp</p>
+          </article>
+          <article class="tip-card">
+            <i class="fas fa-running" aria-hidden="true"></i>
+            <h3>Vận động</h3>
+            <p>Duy trì hoạt động thể chất thường xuyên</p>
+          </article>
+        </div>
+      </section>
+    </div>
+
+    <!-- Additional Sections -->
+    <div class="dashboard-grid">
+      <!-- Recent Activities -->
+      <section class="dashboard-section" aria-labelledby="recent-activities-title">
+        <div class="section-header">
+          <h2 id="recent-activities-title">Hoạt động gần đây</h2>
+        </div>
+        <div class="activity-list">
+          <article class="activity-item" *ngFor="let appoi of appointments.slice(0, 3)">
+            <div class="activity-icon">
+              <i class="fas fa-calendar-check" aria-hidden="true"></i>
+            </div>
+            <div class="activity-details">
+              <h4>Lịch hẹn với {{ appoi.petName }}</h4>
+              <p>{{ appoi.appointmentDate | date:'dd/MM/yyyy HH:mm' }}</p>
+              <span class="activity-date" role="status">{{ getStatusText(appoi.status) }}</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Quick Links -->
+      <section class="dashboard-section" aria-labelledby="quick-links-title">
+        <div class="section-header">
+          <h2 id="quick-links-title">Liên kết nhanh</h2>
+        </div>
+        <nav class="quick-links">
+          <a href="/profile" class="quick-link" aria-label="Go to profile">
+            <i class="fas fa-user" aria-hidden="true"></i>
+            <span>Hồ sơ cá nhân</span>
+          </a>
+          <a href="/chat/chatrealtime" class="quick-link" aria-label="Chat with doctor">
+            <i class="fas fa-comments" aria-hidden="true"></i>
+            <span>Chat với bác sĩ</span>
+          </a>
+          <a href="/support" class="quick-link" aria-label="Get support">
+            <i class="fas fa-headset" aria-hidden="true"></i>
+            <span>Hỗ trợ</span>
+          </a>
+        </nav>
+      </section>
+    </div>
+  </div>
+</main>

@@ -1,0 +1,28 @@
+<div class="product-form-container">
+  <h2 class="form-title">Thêm sản phẩm mới</h2>
+  <form (ngSubmit)="onSubmit()" class="product-form">
+    <div class="form-group">
+      <label for="name">Tên sản phẩm:</label>
+      <input id="name" [(ngModel)]="product.name" name="name" required class="form-control" />
+    </div>
+    <div class="form-group">
+      <label for="description">Mô tả:</label>
+      <textarea id="description" [(ngModel)]="product.description" name="description" required class="form-control"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label for="price">Giá:</label>
+        <input id="price" type="number" [(ngModel)]="product.price" name="price" required class="form-control" />
+      </div>
+      <div class="form-group">
+        <label for="stock">Số lượng:</label>
+        <input id="stock" type="number" [(ngModel)]="product.stock" name="stock" required class="form-control" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="image" class="file-label">Hình ảnh:</label>
+      <input id="image" type="file" (change)="onFileSelected($event)" required class="file-input" />
+    </div>
+    <button type="submit" class="submit-btn">Thêm sản phẩm</button>
+  </form>
+</div>

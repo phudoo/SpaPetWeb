@@ -1,0 +1,16 @@
+<h2>Danh sách User</h2>
+<button> <a routerLink="/adduser">Thêm Mới Tài Khoản </a> </button>
+<table border="1">
+  <tr>
+    <th>username</th>
+    <th>password</th>
+    <th>emai</th>
+  </tr>
+  <tr *ngFor="let user of users">
+    <td>{{ user.username }}</td>
+    <td>{{ user.fullName }}</td>
+    <td>{{ user.email }}</td>
+    <td><a [routerLink]="['/edituser', user.id]"> Sửa </a>  </td>
+    <td> <button (click)="deleteUser(user.id)">Xoá</button> </td>
+  </tr>
+</table>

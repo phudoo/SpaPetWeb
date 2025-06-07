@@ -1,0 +1,46 @@
+<div *ngIf="errorMessage" class="error">
+  {{ errorMessage }}
+</div>
+
+<div *ngIf="cartItems.length > 0; else emptyCart" class="cart-container">
+  <h2>Giỏ hàng của bạn</h2>
+  <form #cartForm="ngForm" class="cart-form">
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Tên sản phẩm</th>
+          <th>Số lượng</th>
+          <th>Giá</th>
+          <th>Tổng tiền</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of cartItems">
+          <td>
+            <input type="checkbox" [(ngModel)]="item.selected" name="selected{{item.productId}}">
+          </td>
+          <td>{{ item.productName || 'Sản phẩm #' + item.productId }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ item.price | number:'1.0-0' }}₫</td>
+          <td>{{ (item.price * item.quantity) | number:'1.0-0' }}₫</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="4" style="text-align: right;"><strong>Tổng cộng:</strong></td>
+          <td>{{ calculateTotal() | number:'1.0-0' }}₫</td>
+        </tr>
+      </tfoot>
+    </table>
+    <div class="actions">
+      <button type="button" (click)="goToAddOrder()" [disabled]="!hasSelectedItems()">
+        Đặt đơn
+      </button>
+    </div>
+  </form>
+</div>
+
+<ng-template #emptyCart>
+  <p>Giỏ hàng của bạn đang trống.</p>
+</ng-template>
