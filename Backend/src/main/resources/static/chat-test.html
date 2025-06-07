@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Test</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        .chat-container {
+            width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+        .message-container {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .received {
+            background-color: #e9ecef;
+        }
+        .sent {
+            background-color: #007bff;
+            color: white;
+            text-align: right;
+        }
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+        input, button {
+            padding: 5px;
+        }
+        button {
+            cursor: pointer;
+        }
+        .status {
+            color: #666;
+            font-style: italic;
+            margin: 5px 0;
+        }
+        .login-container {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h2>Chat Test</h2>
+        <div id="login-container" class="login-container">
+            <h3>Login</h3>
+            <div>
+                <input type="text" id="username" placeholder="Username">
+                <input type="password" id="password" placeholder="Password">
+                <button onclick="login()">Login</button>
+            </div>
+            <span id="loginStatus" class="status"></span>
+        </div>
+    </div>
+
+    <script>
+        let stompClient = null;
+        let userId = null;
+        let isConnected = false;
+        let jwtToken = null;
+        let currentReceiverId = null;
+        let isDoctor = false;
+
+        async function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (!username || !password) {
+                alert('Please enter username and password');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    jwtToken = data.token;
+                    document.getElementById('loginStatus').textContent = 'Login successful';
+                    document.getElementById('loginStatus').style.color = 'green';
+                    await afterLogin();
+                } else {
+                    document.getElementById('loginStatus').textContent = 'Login failed';
+                    document.getElementById('loginStatus').style.color = 'red';
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                document.getElementById('loginStatus').textContent = 'Login error';
+                document.getElementById('loginStatus').style.color = 'red';
+            }
+        }
+
+        async function afterLogin() {
+            // Lấy user info từ token
+            const res = await fetch('/api/auth/me', {
+                headers: { 'Authorization': 'Bearer ' + jwtToken }
+            });
+            if (res.ok) {
+                const user = await res.json();
+                userId = user.id;
+                isDoctor = (userId === 9);
+                document.getElementById('login-container').style.display = 'none';
+                connectWebSocket();
+                if (isDoctor) {
+                    showDoctorUI();
+                } else {
+                    showUserUI();
+                }
+            } else {
+                alert('Lấy thông tin user thất bại!');
+            }
+        }
+
+        function connectWebSocket() {
+            const socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            stompClient.debug = null;
+            const headers = { 'Authorization': 'Bearer ' + jwtToken };
+            stompClient.connect(headers, onConnected, onError);
+        }
+
+        function onConnected() {
+            isConnected = true;
+            stompClient.subscribe('/user/' + userId + '/queue/messages', onMessageReceived);
+        }
+
+        function onError(error) {
+            isConnected = false;
+        }
+
+        function sendMessage() {
+            if (!isConnected) {
+                alert('Please connect first');
+                return;
+            }
+            let receiverId;
+            let message;
+            if (isDoctor) {
+                receiverId = currentReceiverId;
+                if (!receiverId) {
+                    alert('Chọn user để chat!');
+                    return;
+                }
+                message = document.getElementById('doctorMessageInput').value;
+            } else {
+                receiverId = 9;
+                message = document.getElementById('userMessageInput').value;
+            }
+            if (!message) {
+                alert('Nhập nội dung tin nhắn');
+                return;
+            }
+            const chatMessage = {
+                senderId: parseInt(userId),
+                receiverId: parseInt(receiverId),
+                message: message
+            };
+            stompClient.send("/app/chat.send", {}, JSON.stringify(chatMessage));
+            if (isDoctor) {
+                document.getElementById('doctorMessageInput').value = '';
+            } else {
+                document.getElementById('userMessageInput').value = '';
+            }
+        }
+
+        function onMessageReceived(payload) {
+            const message = JSON.parse(payload.body);
+            if (isDoctor) {
+                // Nếu đang chat với user này thì hiển thị
+                if (message.senderId === parseInt(currentReceiverId) || message.receiverId === parseInt(currentReceiverId)) {
+                    addMessageToUI(message, message.senderId === parseInt(userId));
+                }
+                // Nếu là tin nhắn mới từ user khác, cập nhật danh sách
+                if (message.senderId !== 9 && !userListIds.includes(message.senderId)) {
+                    fetchUserList();
+                }
+            } else {
+                // User thường chỉ chat với bác sĩ
+                addMessageToUI(message, message.senderId === parseInt(userId));
+            }
+            // Mark as read nếu là người nhận
+            if (message.senderId !== parseInt(userId)) {
+                fetch(`/api/chat/read/${message.senderId}/${userId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + jwtToken }
+                });
+            }
+        }
+
+        function addMessageToUI(message, isSent) {
+            let messageContainer;
+            if (isDoctor) {
+                messageContainer = document.getElementById('doctorMessageContainer');
+            } else {
+                messageContainer = document.getElementById('userMessageContainer');
+            }
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+            const time = new Date(message.createdAt).toLocaleTimeString();
+            messageDiv.textContent = `${message.senderName || 'You'}: ${message.message} (${time})`;
+            messageContainer.appendChild(messageDiv);
+            messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+
+        function showUserUI() {
+            document.getElementById('user-chat-ui').style.display = 'block';
+            loadChatHistory(userId, 9);
+        }
+
+        // Doctor UI
+        let userListIds = [];
+        function showDoctorUI() {
+            document.getElementById('doctor-chat-ui').style.display = 'block';
+            fetchUserList();
+        }
+        async function fetchUserList() {
+            const res = await fetch('/api/chat/users-chatted-with-doctor', {
+                headers: { 'Authorization': 'Bearer ' + jwtToken }
+            });
+            if (res.ok) {
+                const users = await res.json();
+                userListIds = users.map(u => u.id);
+                const listDiv = document.getElementById('userList');
+                listDiv.innerHTML = '';
+                users.forEach(user => {
+                    const btn = document.createElement('button');
+                    btn.textContent = user.username + (user.fullName ? ` (${user.fullName})` : '');
+                    btn.onclick = () => {
+                        currentReceiverId = user.id;
+                        document.getElementById('doctorMessageContainer').innerHTML = '';
+                        loadChatHistory(userId, currentReceiverId);
+                    };
+                    listDiv.appendChild(btn);
+                });
+            }
+        }
+
+        function loadChatHistory(userId, receiverId) {
+            currentReceiverId = receiverId;
+            fetch(`/api/chat/history/${userId}/${receiverId}`, {
+                headers: { 'Authorization': 'Bearer ' + jwtToken }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load chat history');
+                }
+                return response.json();
+            })
+            .then(messages => {
+                let messageContainer;
+                if (isDoctor) {
+                    messageContainer = document.getElementById('doctorMessageContainer');
+                } else {
+                    messageContainer = document.getElementById('userMessageContainer');
+                }
+                messageContainer.innerHTML = '';
+                messages.forEach(message => {
+                    addMessageToUI(message, message.senderId === parseInt(userId));
+                });
+            })
+            .catch(error => {
+                let messageContainer;
+                if (isDoctor) {
+                    messageContainer = document.getElementById('doctorMessageContainer');
+                } else {
+                    messageContainer = document.getElementById('userMessageContainer');
+                }
+                console.error('Error loading chat history:', error);
+                messageContainer.innerHTML = 
+                    '<div class="message received">Error loading chat history. Please try again.</div>';
+            });
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        window.onbeforeunload = function() {
+            if (stompClient) {
+                stompClient.disconnect();
+            }
+        };
+    </script>
+
+    <div id="user-chat-ui" style="display:none">
+        <div class="message-container" id="userMessageContainer"></div>
+        <div class="input-container">
+            <input type="text" id="userMessageInput" placeholder="Type your message" onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    <div id="doctor-chat-ui" style="display:none">
+        <div>
+            <strong>Danh sách user đã nhắn tin:</strong>
+            <div id="userList"></div>
+        </div>
+        <div class="message-container" id="doctorMessageContainer"></div>
+        <div class="input-container">
+            <input type="text" id="doctorMessageInput" placeholder="Type your message" onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+</body>
+</html> 
